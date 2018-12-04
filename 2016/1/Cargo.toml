@@ -1,0 +1,7 @@
+[package]
+name = "p1"
+version = "0.1.0"
+authors = ["rbenua"]
+
+[dependencies]
+regex = "0.1.80"

@@ -1,0 +1,8 @@
+[package]
+name = "p5"
+version = "0.1.0"
+authors = ["rbenua"]
+
+[dependencies]
+regex = "0.1.80"
+md5 = "0.2.1"
