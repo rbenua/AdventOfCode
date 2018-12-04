@@ -22,7 +22,7 @@ with open(sys.argv[1], 'r') as f:
         for x in range(startx, startx + lenx):
             for y in range(starty, starty + leny):
                 counts[(x, y)] = counts.get((x, y), 0) + 1
-print(claims)
+
 for (id, startx, starty, lenx, leny) in claims:
     contended = False
     for x in range(startx, startx + lenx):
