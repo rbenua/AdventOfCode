@@ -8,18 +8,18 @@ with open(sys.argv[1], 'r') as f:
 def process(c, ichars):
     print("removing ", c)
     chars = ichars.copy()
-    i = 0
-    while i < len(chars) - 1:
+    i = len(chars) - 1
+    while i > 0:
         if chars[i].lower() == c:
             del chars[i]
-            if i > 0:
-                i -= 1
-        elif chars[i] != chars[i+1] and chars[i].lower() == chars[i+1].lower():
-            del chars[i:i+2]
-            if i > 0:
-                i -= 1
+            if i >= len(chars):
+                i = len(chars) - 1
+        elif chars[i] != chars[i-1] and chars[i].lower() == chars[i-1].lower():
+            del chars[i-1:i+1]
+            if i >= len(chars):
+                i = len(chars) - 1
         else:
-            i += 1
+            i -= 1
 #    print(chars)
 #    print(len(chars))
     return len(chars)
