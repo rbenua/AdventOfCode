@@ -37,6 +37,10 @@ def value(n):
     else:
         return sum([value(n.children[c - 1]) for c in n.metadata if c < len(n.children) + 1])
 
+def depth(n):
+    return 1 + max([depth(c) for c in n.children] + [0])
+
 #pretty(parse(inp)[0], 0)
 print(value(parse(inp)[0]))
+print(depth(parse(inp)[0]))
 
