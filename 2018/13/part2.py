@@ -62,10 +62,10 @@ def read_input(filename):
             map.append(l)
 
 def step():
-    it = sorted(carts.items())
-    idx = 0
-    while idx < len(it):
-        ((y,x),(d,i)) = it[idx]
+    for ((y,x),(d,i)) in sorted(carts.items()):
+        if (y,x) not in carts:
+            # we removed this one in an earlier collision
+            continue
         if d == CartDir.up:
             newpos = (y-1,x)
         elif d == CartDir.down:
@@ -75,14 +75,8 @@ def step():
         else:
             newpos = (y,x+1)
         if newpos in carts:
-            if newpos > (y,x):
-                try:
-                    it.remove((newpos,carts[newpos]))
-                except ValueError:
-                    pass
             del carts[(y,x)]
             del carts[newpos]
-            idx += 1
             continue
         
         dt = map[newpos[0]][newpos[1]]
@@ -111,7 +105,6 @@ def step():
 
         del carts[(y,x)]
         carts[newpos] = (newdir, newi)
-        idx += 1
 
     if len(carts) == 1:
         return carts.items()
