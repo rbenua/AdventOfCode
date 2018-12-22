@@ -62,7 +62,7 @@ def run(filename):
     read_input(filename)
     build_adjs(0, (0,0))
     p = shortest_paths((0,0))
-    print(p)
+    #print(p)
     print(len([pt for pt in p.values() if pt >= 1000]))
 
 if __name__ == "__main__":
