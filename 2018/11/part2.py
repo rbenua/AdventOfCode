@@ -26,20 +26,19 @@ def quadpower(x, y, size):
 
 def update(size, memo):
     lmax = (0,0,0)
-    newmemo = [[0] * 300] * 300
     for x in range(301 - size):
         for y in range(301 - size):
             p = rgnpower(x, y, size, memo)
             #print((x,y,p))
-            newmemo[x][y] = p
+            memo[x][y] = p
             lmax = max(lmax, (p, x+1, y+1))
-    return lmax, newmemo
+    return lmax
 
 def run():
     best = ((0,0,0),0)
-    memo = [[0] * 300] * 300
+    memo = [[0] * 300 for i in range(300)]
     for size in range(1, 301):
-        lmax, memo = update(size, memo)
+        lmax = update(size, memo)
         best = max(best, (lmax, size))
         print((lmax, size))
     print(best)
@@ -48,9 +47,10 @@ def runquad():
     pwrs = []
     for sz in range(1,301):
         lmax = max([(quadpower(x,y,sz),x+1,y+1,sz) for x in range(301-sz) for y in range(301-sz)])
-        print((lmax,sz))
-        pwrs.append((lmax,sz))
+        print(lmax)
+        pwrs.append(lmax)
     print(max(pwrs))
 
 if __name__ == '__main__':
-    runquad()
+    #runquad()
+    run()
