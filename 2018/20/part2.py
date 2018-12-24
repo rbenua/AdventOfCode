@@ -28,19 +28,21 @@ def add_edge(curr_pos, dir):
     adjs[dest].add(curr_pos)
     return dest
 
-def build_adjs(idx, curr_pos):
-    starting_pos = curr_pos
+def build_adjs(idx, currs):
+    starts = currs.copy()
+    ends = set()
     while idx < len(pattern):
         if pattern[idx] in 'NESW':
-            curr_pos = add_edge(curr_pos, pattern[idx])
+            currs = {add_edge(curr_pos, pattern[idx]) for curr_pos in currs}
             idx += 1
         elif pattern[idx] == '(':
-            idx = build_adjs(idx + 1, curr_pos)
+            (idx, currs) = build_adjs(idx + 1, currs)
         elif pattern[idx] == '|':
             idx += 1
-            curr_pos = starting_pos
+            ends |= currs
+            currs = starts.copy()
         elif pattern[idx] == ')':
-            return idx + 1
+            return (idx + 1, ends | currs)
         else:
             raise ValueError
     return idx
@@ -60,7 +62,7 @@ def shortest_paths(source):
 
 def run(filename):
     read_input(filename)
-    build_adjs(0, (0,0))
+    build_adjs(0, {(0,0)})
     p = shortest_paths((0,0))
     #print(p)
     print(len([pt for pt in p.values() if pt >= 1000]))
