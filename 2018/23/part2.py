@@ -31,12 +31,15 @@ def zdist(x1, y1, z1, x2, y2, z2):
     return zabs(x1 - x2) + zabs(y1 - y2) + zabs(z1 - z2)
 
 def build_solver():
-    (x, y, z, npts, zdist) = Ints("x y z npts zdist")
+    (x, y, z, npts, fromzero) = Ints("x y z npts fromzero")
     s = Optimize()
-    s.add(npts == Sum([If(zdist(x,y,z, px, py, pz) <= r, 1, 0) for ((px, py, pz), r) in pts]))
-    s.add(zdist == (zabs(x) + zabs(y) + zabs(z)))
+    in_range = []
+    for ((px, py, pz), r) in pts:
+        in_range.append(If(zdist(x,y,z, px,py,pz) <= r, 1, 0))
+    s.add(npts == Sum(in_range))
+    s.add(fromzero == (zabs(x) + zabs(y) + zabs(z)))
     s.maximize(npts)
-    s.minimize(zdist)
+    s.minimize(fromzero)
     return s
 
 
