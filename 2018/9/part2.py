@@ -50,7 +50,8 @@ def printlist():
 
 for marble in range(1, marbles):
     if marble % 1000 == 0:
-        print("processed {} marbles".format(marble))
+        pass
+        #print("processed {} marbles".format(marble))
     player = marble % players
     if marble % 23 == 0:
         curr = curr.bseek(7)

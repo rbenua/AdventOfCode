@@ -18,14 +18,12 @@ def part1(inp):
 
 
 def part2(inp):
-    l = 1
     cursor = 0
     current = 0
     for i in range(1, 50000001):
-        pos = ((cursor + inp) % l) + 1
+        pos = ((cursor + inp) % i) + 1
         if pos == 1:
             current = i
-        l += 1
         cursor = pos
     return current
 

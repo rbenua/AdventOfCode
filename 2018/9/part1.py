@@ -11,6 +11,7 @@ ring = [0]
 curr = 0
 
 for marble in range(1, marbles):
+    print(curr, ring)
     player = marble % players
     if marble % 23 == 0:
         curr = (curr - 7) % len(ring)

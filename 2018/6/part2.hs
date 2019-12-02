@@ -43,5 +43,4 @@ go filename = do input <- readFile filename
                      (minx, maxx, miny, maxy) = limits pts
                  print $ S.size $ flood (isInRange 10000 pts) S.empty (S.singleton ((minx + maxx) `div` 2, (miny + maxy) `div` 2))
 
-main = do args <- getArgs
-          go $ head args
+main = head <$> getArgs >>= go

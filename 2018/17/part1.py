@@ -155,7 +155,7 @@ def run(filename):
     #printgrid()
     simulate()
     #print()
-    #printgrid()
+    printgrid()
     print(len([x for ((x,y),sq) in grid.items() if y >= miny and sq.type != Square.Wall]))
 
 

@@ -147,8 +147,11 @@ def spread(sq):
 
 def simulate():
     while len(toProcess) != 0:
+        printgrid()
+        print()
         pos = toProcess.pop()
         spread(grid[pos])
+
 
 def run(filename):
     read_input(filename)
