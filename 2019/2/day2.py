@@ -36,7 +36,6 @@ def part1(inp):
 
 def part2(inp):
     for v1 in range(100):
-        print(v1)
         for v2 in range(100):
             l = inp.copy()
             l[1] = v1
