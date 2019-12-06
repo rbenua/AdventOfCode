@@ -22,7 +22,7 @@ def execute(inp, in_fn, out_fn = out_print):
             print("PC out of bounds", pc)
             return
         opcode = inp[pc] % 100
-        modes = [int(c) for c in list("{:05}".format(int(inp[pc] / 100)))]
+        modes = [int(c) for c in list("{:010}".format(int(inp[pc] / 100)))]
         modes.reverse()
         def get_arg(offset):
             mode = modes[offset]
@@ -42,7 +42,6 @@ def execute(inp, in_fn, out_fn = out_print):
                 inp[arg] = val
             else:
                 print("Invalid output mode", mode)
-                return 0
 
         if opcode == 99:
             return
@@ -82,7 +81,7 @@ def execute(inp, in_fn, out_fn = out_print):
             pc += 4
 
         else:
-            print("illegal opcode!" + opcode)
+            print("illegal opcode!", opcode)
             return
             
         
