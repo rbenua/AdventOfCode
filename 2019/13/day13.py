@@ -118,8 +118,8 @@ def part1(inp):
     return len(blocks)
 
 def print_grid(blocks, score, maxx, maxy):
-    for y in range(maxy):
-        print("".join([" #@=*"[blocks[(x,y)]] for x in range(maxx)]))
+    for y in range(maxy+1):
+        print("".join([" #@=*"[blocks[(x,y)]] for x in range(maxx+1)]))
     print(score)
 
 def part2(inp):
@@ -156,7 +156,7 @@ def part2(inp):
         parity = (parity + 1) % 3
     def in_controls():
         print_grid(blocks, score, maxx, maxy)
-        print(ballx, balldir, paddlex)
+        #print(ballx, balldir, paddlex)
         if paddlex < ballx:
             return 1
         elif paddlex > ballx:

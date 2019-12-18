@@ -106,6 +106,7 @@ def neighbors(here):
 def part1(inp):
     explored = {(0, 0)}
     to_expand = [(0, (0, 0), inp.copy(), 0, 0)]
+    maxfront = 1
     while True:
         (dist, here, prog, pc, rb) = to_expand.pop(0)
         for (cmd, (newx, newy)) in neighbors(here):
@@ -115,15 +116,18 @@ def part1(inp):
             newprog = prog.copy()
             (res, newpc, newrb) = execute(newprog, const(cmd), out_print, True, pc, rb)
             if res == 2:
+                print(maxfront)
                 return (dist + 1, newpt, newprog, newpc, newrb)
             explored.add(newpt)
             if res == 1:
                 to_expand.append((dist +1, newpt, newprog, newpc, newrb))
+        maxfront = max(maxfront, len(to_expand))
 
 
 def part2(inp):
     explored = {inp[1]}
     to_expand = [(0, *inp[1:])]
+    maxfront = 1
     while True:
         (dist, here, prog, pc, rb) = to_expand.pop(0)
         for (cmd, (newx, newy)) in neighbors(here):
@@ -136,7 +140,8 @@ def part2(inp):
             if res != 0:
                 to_expand.append((dist +1, newpt, newprog, newpc, newrb))
         if len(to_expand) == 0:
-            return dist
+            return dist, maxfront
+        maxfront = max(maxfront, len(to_expand))
 
 def run(filename):
     inp = read_input(filename)

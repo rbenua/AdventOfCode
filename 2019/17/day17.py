@@ -2,15 +2,8 @@
 
 import sys, re, collections, math
 
-pat = re.compile("x=(-?\d+), y=(-?\d+), z=(-?\d+)")
 def read_input(filename):
-    with open(filename, 'r') as f:
-        arr = []
-        for line in f:
-            match = pat.search(line)
-            p = [int(match.group(1)), int(match.group(2)), int(match.group(3))]
-            arr.append(p)
-        return arr
+    return read_intcode(filename)
 
 def read_intcode(filename):
     with open(filename, 'r') as f:
@@ -21,17 +14,13 @@ def read_intcode(filename):
             c[k] = v
         return c
 
-def get_input_1():
-    return 1
-def get_input_2():
-    return 2
+def const(val):
+    return lambda: val
 
 def out_print(i):
-    print("output:", i)
+    print(f"output: {i}")
 
-def execute(inp, in_fn, out_fn = out_print):
-    pc = 0
-    relbase = 0
+def execute(inp, in_fn, out_fn = out_print, stop_on_output = False, pc = 0, relbase = 0):
     while True:
         if pc < 0 or pc >= len(inp):
             print("PC out of bounds", pc)
@@ -74,8 +63,12 @@ def execute(inp, in_fn, out_fn = out_print):
             set_arg(0, in_fn())
             pc += 2
         elif opcode == 4:
-            out_fn(get_arg(0))
+            val = get_arg(0)
             pc += 2
+            if stop_on_output:
+                return (val, pc, relbase)
+            else:
+                out_fn(val)
         elif opcode == 5:
             if get_arg(0) != 0:
                 pc = get_arg(1)
@@ -106,60 +99,83 @@ def execute(inp, in_fn, out_fn = out_print):
             print("illegal opcode!", opcode)
             return
             
-def pairs(l):
-    ps = []
-    for i in range(l):
-        ps += [(i, j) for j in range(i+1, l)]
-    return ps
+def neighbors(here):
+    x, y = here
+    return ((1, (x, y-1)), (2, (x, y+1)), (3, (x-1, y)), (4, (x+1, y)))
 
-def energy(ps, vs):
-    return sum(sum(abs(c) for c in p) * sum(abs(c) for c in v) for (p, v) in zip(ps, vs))
+def printgrid(scaffolds):
+    xs = [x for (x, y) in scaffolds]
+    ys = [y for (x, y) in scaffolds]
+    minx, maxx = min(xs), max(xs)
+    miny, maxy = min(ys), max(ys)
 
-def tuplify(l):
-    return tuple(tuple(c) for c in l)
+    for y in range(miny, maxy + 1):
+        print("".join([".#>"[((x, y) in scaffolds) + ((x, y) == (32, 18))] for x in range(minx, maxx + 1)]))
 
 def part1(inp):
-    ps = [moon.copy() for moon in inp]
-    vs = [[0, 0, 0] for _ in ps]
-    for step in range(1000):
-        for (a, b) in pairs(len(ps)):
-            for coord in range(3):
-                if ps[a][coord] < ps[b][coord]:
-                    vs[a][coord] += 1
-                    vs[b][coord] -= 1
-                elif ps[a][coord] > ps[b][coord]:
-                    vs[a][coord] -= 1
-                    vs[b][coord] += 1
-        for i in range(len(ps)):
-            for c in range(len(ps[i])):
-                ps[i][c] += vs[i][c]
-    return energy(ps, vs)
+    x, y = 0, 0
+    scaffolds = set()
+    def out_map(val):
+        nonlocal x, y, scaffolds
+        if val == 35 or val == 118 or val == 94 or val == 62 or val == 60:
+            if val != 35:
+                print(val, x, y)
+            scaffolds.add((x, y))
+        elif val == 10:
+            x = 0
+            y += 1
+            return
+        elif val == 46 or val == 88:
+            pass
+        else:
+            print("Weird output", val)
+        x += 1
+    
+    execute(inp.copy(), const(1), out_map)
 
-def lcm(a, b):
-    return (a * b) // math.gcd(a, b)
+    total = 0
+    for pt in scaffolds:
+        intersection = True
+        for (_, pt2) in neighbors(pt):
+            if pt2 not in scaffolds:
+                intersection = False
+        if intersection:
+            total += pt[0] * pt[1]
+    printgrid(scaffolds)
+    return total
+
+
+
 
 def part2(inp):
-    periods = [0, 0, 0]
-    for axis in range(3):
-        ps = [moon[axis] for moon in inp]
-        vs = [0 for _ in ps]
-        seen = set()
-        t = (tuple(ps), tuple(vs))
-        while t not in seen:
-            seen.add(t)
-            for (a, b) in pairs(len(ps)):
-                if ps[a] < ps[b]:
-                    vs[a] += 1
-                    vs[b] -= 1
-                elif ps[a] > ps[b]:
-                    vs[a] -= 1
-                    vs[b] += 1
-            for i in range(len(ps)):
-                ps[i] += vs[i]
-            t = (tuple(ps), tuple(vs))
-        periods[axis] = len(seen)
-        print(periods[axis])
-    return lcm(lcm(periods[0], periods[1]), periods[2])
+    main = "A,B,B,A,B,C,A,C,B,C\n"
+    pathA = "L,4,L,6,L,8,L,12\n"
+    pathB = "L,8,R,12,L,12\n"
+    pathC = "R,12,L,6,L,6,L,8\n"
+    ack = "n\n"
+    inputs = [main, pathA, pathB, pathC, ack]
+    input_idx, string_idx = 0,0
+    def feed_input():
+        nonlocal input_idx, string_idx
+        if input_idx < len(inputs) and string_idx >= len(inputs[input_idx]):
+            string_idx = 0
+            input_idx += 1
+        if input_idx >= len(inputs):
+            print("sending input 0")
+            return 0
+        val = ord(inputs[input_idx][string_idx])
+        string_idx += 1
+        print(f"sending input {val} ({chr(val)})")
+        return val
+    
+    def raw_output(val):
+        if val < 128:
+            print(chr(val), end="")
+        else:
+            print(val)
+    inp[0] = 2
+    execute(inp, feed_input, raw_output)
+
 
 def run(filename):
     inp = read_input(filename)

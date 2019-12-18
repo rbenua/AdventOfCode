@@ -2,15 +2,9 @@
 
 import sys, re, collections, math
 
-pat = re.compile("x=(-?\d+), y=(-?\d+), z=(-?\d+)")
 def read_input(filename):
     with open(filename, 'r') as f:
-        arr = []
-        for line in f:
-            match = pat.search(line)
-            p = [int(match.group(1)), int(match.group(2)), int(match.group(3))]
-            arr.append(p)
-        return arr
+        return [int(c) for c in f.read().strip()]
 
 def read_intcode(filename):
     with open(filename, 'r') as f:
@@ -21,17 +15,13 @@ def read_intcode(filename):
             c[k] = v
         return c
 
-def get_input_1():
-    return 1
-def get_input_2():
-    return 2
+def const(val):
+    return lambda: val
 
 def out_print(i):
     print("output:", i)
 
-def execute(inp, in_fn, out_fn = out_print):
-    pc = 0
-    relbase = 0
+def execute(inp, in_fn, out_fn = out_print, stop_on_output = False, pc = 0, relbase = 0):
     while True:
         if pc < 0 or pc >= len(inp):
             print("PC out of bounds", pc)
@@ -74,8 +64,12 @@ def execute(inp, in_fn, out_fn = out_print):
             set_arg(0, in_fn())
             pc += 2
         elif opcode == 4:
-            out_fn(get_arg(0))
+            val = get_arg(0)
             pc += 2
+            if stop_on_output:
+                return (val, pc, relbase)
+            else:
+                out_fn(val)
         elif opcode == 5:
             if get_arg(0) != 0:
                 pc = get_arg(1)
@@ -105,61 +99,39 @@ def execute(inp, in_fn, out_fn = out_print):
         else:
             print("illegal opcode!", opcode)
             return
-            
-def pairs(l):
-    ps = []
-    for i in range(l):
-        ps += [(i, j) for j in range(i+1, l)]
-    return ps
+        
+def sequence(write_idx, read_idx):
+    return [0, 1, 0, -1][((read_idx + 1) // (write_idx + 1)) % 4]
 
-def energy(ps, vs):
-    return sum(sum(abs(c) for c in p) * sum(abs(c) for c in v) for (p, v) in zip(ps, vs))
-
-def tuplify(l):
-    return tuple(tuple(c) for c in l)
 
 def part1(inp):
-    ps = [moon.copy() for moon in inp]
-    vs = [[0, 0, 0] for _ in ps]
-    for step in range(1000):
-        for (a, b) in pairs(len(ps)):
-            for coord in range(3):
-                if ps[a][coord] < ps[b][coord]:
-                    vs[a][coord] += 1
-                    vs[b][coord] -= 1
-                elif ps[a][coord] > ps[b][coord]:
-                    vs[a][coord] -= 1
-                    vs[b][coord] += 1
-        for i in range(len(ps)):
-            for c in range(len(ps[i])):
-                ps[i][c] += vs[i][c]
-    return energy(ps, vs)
+    for iteration in range(100):
+        print(iteration)
+        out = [0] * len(inp)
+        for write_idx in range(len(out)):
+            val = 0
+            for read_idx in range(len(inp)):
+                val += inp[read_idx] * sequence(write_idx, read_idx)
+            out[write_idx] = abs(val) % 10
+        inp = out
 
-def lcm(a, b):
-    return (a * b) // math.gcd(a, b)
+    return "".join(map(str, inp[0:8]))
 
 def part2(inp):
-    periods = [0, 0, 0]
-    for axis in range(3):
-        ps = [moon[axis] for moon in inp]
-        vs = [0 for _ in ps]
-        seen = set()
-        t = (tuple(ps), tuple(vs))
-        while t not in seen:
-            seen.add(t)
-            for (a, b) in pairs(len(ps)):
-                if ps[a] < ps[b]:
-                    vs[a] += 1
-                    vs[b] -= 1
-                elif ps[a] > ps[b]:
-                    vs[a] -= 1
-                    vs[b] += 1
-            for i in range(len(ps)):
-                ps[i] += vs[i]
-            t = (tuple(ps), tuple(vs))
-        periods[axis] = len(seen)
-        print(periods[axis])
-    return lcm(lcm(periods[0], periods[1]), periods[2])
+    offset = int("".join(map(str, inp[0:7])))
+    inp = (inp * 10000)[offset:]
+    for iteration in range(100):
+        print(iteration)
+        out = [0] * len(inp)
+        write_idx = len(inp) - 1
+        prev_write = 0
+        while write_idx >= 0:
+            out[write_idx] = (inp[write_idx] + prev_write) % 10
+            prev_write = out[write_idx]
+            write_idx -= 1
+        inp = out
+    return "".join(map(str, inp[0:8]))
+
 
 def run(filename):
     inp = read_input(filename)
