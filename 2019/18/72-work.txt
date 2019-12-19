@@ -1,0 +1,28 @@
+#############
+#g#f.D#..h#l#
+#F###e#E###.#
+#dCba@#@BcIJ#
+#############
+#nK.L@#@G...#
+#M###N#H###.#
+#o#m..#i#jk.#
+#############
+
+24 14
+22 12
+
+1  Top-left robot collects key e.
+4  Top-right robot collects key h.
+2  Bottom-right robot collects key i.
+2  Top-left robot collects key a.
+1  Top-left robot collects key b.
+6  Top-right robot collects key c.
+2  Top-left robot collects key d.
+8  Top-left robot collects key f.
+10 Top-left robot collects key g.
+9  Bottom-right robot collects key k.
+1  Bottom-right robot collects key j.
+4  Top-right robot collects key l.
+4  Bottom-left robot collects key n.
+8  Bottom-left robot collects key m.
+10 Bottom-left robot collects key o.
