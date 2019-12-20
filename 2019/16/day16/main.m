@@ -29,32 +29,39 @@ int main(int argc, const char * argv[]) {
         id<MTLCommandQueue> queue = [device newCommandQueue];
         id<MTLLibrary> lib = [device newDefaultLibrary];
         id<MTLFunction> compute_func = [lib newFunctionWithName:@"compute"];
-        id<MTLComputePipelineState> state = [device newComputePipelineStateWithFunction:compute_func error:&error];
-        if(!state)
+        id<MTLFunction> sum_func = [lib newFunctionWithName:@"make_sums"];
+        id<MTLFunction> compute_sum_func = [lib newFunctionWithName:@"compute_sums"];
+        id<MTLComputePipelineState> compute_state = [device newComputePipelineStateWithFunction:compute_func error:&error];
+        id<MTLComputePipelineState> sum_state = [device newComputePipelineStateWithFunction:sum_func error:&error];
+        id<MTLComputePipelineState> compute_sum_state = [device newComputePipelineStateWithFunction:compute_sum_func error:&error];
+        
+        if(error)
         {
             NSLog(@"Error creating state %@", error);
             return -1;
         }
         
         // set up input + output buffers
-        NSUInteger len = strlen(input);
-        id<MTLBuffer> in_buf = [device newBufferWithLength:len * 10000 options:MTLResourceStorageModeManaged];
-        id<MTLBuffer> out_buf = [device newBufferWithLength:len * 10000 options:MTLResourceStorageModeManaged];
+        NSUInteger inlen = strlen(input);
+        NSUInteger len = inlen * 10000;
+        id<MTLBuffer> in_buf = [device newBufferWithLength:len options:MTLResourceStorageModeManaged];
+        id<MTLBuffer> out_buf = [device newBufferWithLength:len options:MTLResourceStorageModeManaged];
+        id<MTLBuffer> sum_buf = [device newBufferWithLength:len * sizeof(uint32_t) options:MTLResourceStorageModeManaged];
         id<MTLBuffer> bounds_buf = [device newBufferWithLength:sizeof(struct bounds) options:MTLResourceStorageModeShared];
         struct bounds *bounds = bounds_buf.contents;
-        bounds->len = (uint32_t)len * 10000;
+        bounds->len = (uint32_t)len;
         bounds->start = 0;
         uint8_t *inp = in_buf.contents;
-        for(int i = 0; i < len; i++)
+        for(int i = 0; i < inlen; i++)
         {
             inp[i] = input[i] - '0';
         }
         for(int i = 1; i < 10000; i++)
         {
-            memcpy(inp + (len * i), inp, len);
+            memcpy(inp + (inlen * i), inp, inlen);
         }
         // copy input to GPU
-        [in_buf didModifyRange:NSMakeRange(0, len * 10000)];
+        [in_buf didModifyRange:NSMakeRange(0, len)];
         
         // find result offset
         int offset = 0;
@@ -63,34 +70,53 @@ int main(int argc, const char * argv[]) {
             offset = offset * 10 + inp[i];
         }
         NSLog(@"Offset is %d", offset);
-        bounds->start = offset;
+        //bounds->start = offset;
         // encode 100 compute commands, flip buffers each time, final result will actually be back in in_buf
         id<MTLCommandBuffer> cmdbuffer;
-        MTLSize size = MTLSizeMake(len * 10000 - offset, 1, 1);
+        MTLSize size = MTLSizeMake(len, 1, 1);
         MTLSize groupSize = MTLSizeMake(256, 1, 1);
-        for(int i = 0; i < 50; i++)
+        for(int i = 0; i < 100; i++)
         {
+            NSLog(@"Starting iteration %d", i);
+            cmdbuffer = [queue commandBuffer];
+            id<MTLBlitCommandEncoder> enc = [cmdbuffer blitCommandEncoder];
+            [enc synchronizeResource:in_buf];
+            [enc endEncoding];
+            [cmdbuffer commit];
+            [cmdbuffer waitUntilCompleted];
+            uint32_t *sums_ptr = sum_buf.contents;
+            uint8_t *in_ptr = in_buf.contents;
+            sums_ptr[len - 1] = in_ptr[len - 1];
+            for(int i = len - 2; i >= 0; i--)
+            {
+                sums_ptr[i] = in_ptr[i] + sums_ptr[i+1];
+            }
+            [sum_buf didModifyRange:NSMakeRange(0, len * sizeof(uint32_t))];
+            /*
             cmdbuffer = [queue commandBuffer];
             id<MTLComputeCommandEncoder> enc = [cmdbuffer computeCommandEncoder];
-            [enc setComputePipelineState:state];
+            
+            [enc setComputePipelineState:sum_state];
             [enc setBuffer:in_buf offset:0 atIndex:0];
+            [enc setBuffer:sum_buf offset:0 atIndex:1];
+            [enc setBuffer:bounds_buf offset:0 atIndex:2];
+            [enc dispatchThreads:MTLSizeMake(1, 1, 1) threadsPerThreadgroup:groupSize];
+            [enc endEncoding];
+            
+            enc = [cmdbuffer computeCommandEncoder];
+            [enc setComputePipelineState:compute_sum_state];
+            [enc setBuffer:sum_buf offset:0 atIndex:0];
             [enc setBuffer:out_buf offset:0 atIndex:1];
             [enc setBuffer:bounds_buf offset:0 atIndex:2];
             [enc dispatchThreads:size threadsPerThreadgroup:groupSize];
             [enc endEncoding];
-            // this could be prettier.
-            enc = [cmdbuffer computeCommandEncoder];
-            [enc setComputePipelineState:state];
-            [enc setBuffer:in_buf offset:0 atIndex:1];
-            [enc setBuffer:out_buf offset:0 atIndex:0];
-            [enc setBuffer:bounds_buf offset:0 atIndex:2];
-            [enc dispatchThreads:size threadsPerThreadgroup:groupSize];
-            [enc endEncoding];
-            [cmdbuffer addCompletedHandler:^(id<MTLCommandBuffer> cb){
-                NSLog(@"Finished %d", i);
-            }];
+            
             [cmdbuffer commit];
             [cmdbuffer waitUntilCompleted]; // give AMD's scheduler a chance to do UI work :|
+             */
+            id<MTLBuffer> tmp = in_buf;
+            in_buf = out_buf;
+            out_buf = tmp;
         }
         // Synchronize results to CPU buffer
         cmdbuffer = [queue commandBuffer];

@@ -34,3 +34,32 @@ kernel void compute(device uint8_t *input [[buffer(0)]],
     uint8_t res8 = abs(result) % 10;
     output[write_idx] = res8;
 }
+
+kernel void make_sums(device uint8_t *input [[buffer(0)]],
+                      device uint32_t *output [[buffer(1)]],
+                      constant struct bounds *bounds [[buffer(2)]])
+{
+    output[bounds->len - 1] = input[bounds->len - 1];
+    for(int32_t read_idx = bounds->len-2; read_idx >= 0; read_idx--)
+    {
+        output[read_idx] = input[read_idx] + output[read_idx + 1];
+    }
+}
+
+constant int sum_seq[] = {1, -1, -1, 1};
+
+kernel void compute_sums(device uint8_t *output [[buffer(0)]],
+                         device uint32_t *sums [[buffer(1)]],
+                         constant struct bounds *bounds [[buffer(2)]],
+                         uint32_t write_idx [[thread_position_in_grid]])
+{
+    uint mul = 1;
+    int result = 0;
+    while((write_idx * mul) < bounds->len)
+    {
+        result += sums[write_idx * mul] * sum_seq[mul % 4];
+        mul++;
+    }
+    uint8_t res8 = abs(result) % 10;
+    output[write_idx] = res8;
+}
