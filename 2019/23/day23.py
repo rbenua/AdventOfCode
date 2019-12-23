@@ -133,7 +133,9 @@ def part1(inp):
         t.daemon = True
         t.start()
     (x, y) = queues[50].get()
-    return y #this is going to leave all these threads around until the process exits, but i don't want to try and write a check for  a flag into the middle of the interpreter loop and python doesn't let you kill other threads in a GIL-safe way :|
+    return y #this is going to leave all these threads around until the process exits, 
+             #but i don't want to try and write a check for  a flag into the middle of 
+             #the interpreter loop and python doesn't let you kill other threads in a GIL-safe way :|
 
 def part2(inp):
     pass
