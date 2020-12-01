@@ -55,9 +55,9 @@ kernel void compute_sums(device uint8_t *output [[buffer(0)]],
 {
     uint mul = 1;
     int result = 0;
-    while((write_idx * mul) < bounds->len)
+    while(((write_idx+1) * mul - 1) < bounds->len)
     {
-        result += sums[write_idx * mul] * sum_seq[mul % 4];
+        result += sums[((write_idx+1) * mul)-1] * sum_seq[mul % 4];
         mul++;
     }
     uint8_t res8 = abs(result) % 10;

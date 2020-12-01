@@ -106,7 +106,7 @@ def sequence(write_idx, read_idx):
 
 def part1(inp):
     for iteration in range(100):
-        print(iteration)
+        #print(iteration)
         out = [0] * len(inp)
         for write_idx in range(len(out)):
             val = 0
@@ -121,7 +121,7 @@ def part2(inp):
     offset = int("".join(map(str, inp[0:7])))
     inp = (inp * 10000)[offset:]
     for iteration in range(100):
-        print(iteration)
+        #print(iteration)
         out = [0] * len(inp)
         write_idx = len(inp) - 1
         prev_write = 0

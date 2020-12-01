@@ -21,7 +21,7 @@ struct bounds{
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        char *input = real_input;
+        char *input = test_input2;
         NSError *error = NULL;
         
         // set up metal device and compute pipeline
@@ -86,34 +86,43 @@ int main(int argc, const char * argv[]) {
             [cmdbuffer waitUntilCompleted];
             uint32_t *sums_ptr = sum_buf.contents;
             uint8_t *in_ptr = in_buf.contents;
+            uint8_t *out_ptr = out_buf.contents;
             sums_ptr[len - 1] = in_ptr[len - 1];
             for(int i = len - 2; i >= 0; i--)
             {
                 sums_ptr[i] = in_ptr[i] + sums_ptr[i+1];
             }
             [sum_buf didModifyRange:NSMakeRange(0, len * sizeof(uint32_t))];
-            /*
-            cmdbuffer = [queue commandBuffer];
-            id<MTLComputeCommandEncoder> enc = [cmdbuffer computeCommandEncoder];
-            
-            [enc setComputePipelineState:sum_state];
-            [enc setBuffer:in_buf offset:0 atIndex:0];
-            [enc setBuffer:sum_buf offset:0 atIndex:1];
-            [enc setBuffer:bounds_buf offset:0 atIndex:2];
-            [enc dispatchThreads:MTLSizeMake(1, 1, 1) threadsPerThreadgroup:groupSize];
-            [enc endEncoding];
-            
-            enc = [cmdbuffer computeCommandEncoder];
-            [enc setComputePipelineState:compute_sum_state];
-            [enc setBuffer:sum_buf offset:0 atIndex:0];
-            [enc setBuffer:out_buf offset:0 atIndex:1];
-            [enc setBuffer:bounds_buf offset:0 atIndex:2];
-            [enc dispatchThreads:size threadsPerThreadgroup:groupSize];
-            [enc endEncoding];
-            
-            [cmdbuffer commit];
-            [cmdbuffer waitUntilCompleted]; // give AMD's scheduler a chance to do UI work :|
-             */
+            bool use_cpu = true;
+            if(use_cpu)
+            {
+                const int sum_seq[] = {1, -1, -1, 1};
+                for(int i = len - 1; i >= 0; i--)
+                {
+                    int mul = 1;
+                    int result = 0;
+                    while(((i+1) * mul - 1) < len)
+                    {
+                        result += sums_ptr[((i+1) * mul) - 1] * sum_seq[mul % 4];
+                        mul++;
+                    }
+                    out_ptr[i] = abs(result) % 10;
+                }
+            }
+            else
+            {
+                cmdbuffer = [queue commandBuffer];
+                id<MTLComputeCommandEncoder> enc = [cmdbuffer computeCommandEncoder];
+                [enc setComputePipelineState:compute_sum_state];
+                [enc setBuffer:sum_buf offset:0 atIndex:0];
+                [enc setBuffer:out_buf offset:0 atIndex:1];
+                [enc setBuffer:bounds_buf offset:0 atIndex:2];
+                [enc dispatchThreads:size threadsPerThreadgroup:groupSize];
+                [enc endEncoding];
+                
+                [cmdbuffer commit];
+                [cmdbuffer waitUntilCompleted]; // give AMD's scheduler a chance to do UI work :|
+            }
             id<MTLBuffer> tmp = in_buf;
             in_buf = out_buf;
             out_buf = tmp;

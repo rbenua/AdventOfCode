@@ -104,21 +104,30 @@ def neighbors(here):
     x, y = here
     return ((1, (x, y-1)), (2, (x, y+1)), (3, (x-1, y)), (4, (x+1, y)))
 
-def run_thread(inp, addr, queues):
-    def in_receive(myaddr):
-        yield myaddr
+def run_thread(inp, addr, queues, idles, sem, wakeups):
+    selfidle = False
+    def in_receive():
+        yield addr
         while True:
             try:
-                (x, y) = queues[myaddr].get(False)
+                (x, y) = queues[addr].get(False)
                 yield x
                 yield y
             except queue.Empty:
-                yield -1
+                if not selfidle:
+                    selfidle = True
+                    yield -1
+                else:
+                    idles[addr] = True
+                    sem.release()
+                    wakeups[addr].wait() # this definitely races
+
     out_buf = []    
     def out_send(val):
-        nonlocal out_buf
+        nonlocal out_buf, selfidle
         out_buf.append(val)
         if len(out_buf) == 3:
+            selfidle = False
             if out_buf[0] == 255:
                 out_buf[0] = 50
             queues[out_buf[0]].put((out_buf[1], out_buf[2]))
@@ -133,16 +142,21 @@ def part1(inp):
         t.daemon = True
         t.start()
     (x, y) = queues[50].get()
-    return y #this is going to leave all these threads around until the process exits, 
-             #but i don't want to try and write a check for  a flag into the middle of 
-             #the interpreter loop and python doesn't let you kill other threads in a GIL-safe way :|
+    return y
+
 
 def part2(inp):
-    pass
+    queues = [queue.Queue() for _ in range(51)]
+    idles = [False] * 50
+    for addr in range(50):
+        t = threading.Thread(target=run_thread, args=(inp, addr, queues, idles))
+        t.daemon = True
+        t.start()
+    
 
 def run(filename):
     inp = read_input(filename)
-    print(part1(inp))
+    #print(part1(inp))
     print(part2(inp))
 
 if __name__ == "__main__":
