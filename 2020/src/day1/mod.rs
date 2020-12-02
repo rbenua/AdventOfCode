@@ -1,7 +1,5 @@
 use crate::Problem;
 use crate::read_lines;
-use std::fs;
-use regex::Regex;
 use std::vec::Vec;
 use std::error::Error;
 
@@ -20,26 +18,27 @@ pub fn setup(input:&str) -> Result<Day1, Box<dyn Error>>{
 }
 
 impl Problem for Day1{
-	fn part1(&mut self, _input:&str) -> String{
+	fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
 		for a in &self.nums{
 			for b in &self.nums{
 				if a + b == 2020{
-					return format!("{}", a * b);
+					return Ok(format!("{}", a * b));
 				}
 			}
 		}
-		return String::from("none");
+		Ok(String::from("none"))
 	}
-	fn part2(&mut self, _input:&str) -> String{
+
+	fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
 		for a in &self.nums{
 			for b in &self.nums{
 				for c in &self.nums{
 					if a + b + c == 2020{
-						return format!("{}", a * b * c);
+						return Ok(format!("{}", a * b * c));
 					}
 				}
 			}
 		}
-		return String::from("none");
+		Ok(String::from("none"))
 	}
 }

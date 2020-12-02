@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 regex = "1.4.2"
+string-error = "0.1.0"
