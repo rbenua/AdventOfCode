@@ -40,10 +40,7 @@ impl Problem for Day5{
     fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let mut max = 0;
         for (row, col) in &self.passes {
-            let i = id(row, col);
-            if i > max {
-                max = i;
-            }
+            max = max.max(id(row, col));
         }
         Ok(max.to_string())
     }
