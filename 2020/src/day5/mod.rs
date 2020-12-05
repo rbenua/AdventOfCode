@@ -37,7 +37,7 @@ pub fn setup(_input:&str) -> Result<Day5, Box<dyn Error>>{
 }
 
 impl Problem for Day5{
-	fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
+    fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let mut max = 0;
         for (row, col) in &self.passes {
             let i = id(row, col);
@@ -46,8 +46,8 @@ impl Problem for Day5{
             }
         }
         Ok(max.to_string())
-	}
-	fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
+    }
+    fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let mut ids : Vec<usize> = self.passes.iter().map(|(row, col)|{id(row, col)}).collect();
         ids.sort();
         for i in 0..(ids.len() - 1) {
@@ -56,5 +56,5 @@ impl Problem for Day5{
             }
         }
         Err(new_err("not found"))
-	}
+    }
 }

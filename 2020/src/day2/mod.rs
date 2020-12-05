@@ -43,26 +43,26 @@ pub fn setup(_input:&str) -> Result<Day2, Box<dyn Error>>{
     for line_opt in read_lines(_input){
         res.rows.push(line_opt?.parse()?);
     }
-	Ok(res)
+    Ok(res)
 }
 
 impl Problem for Day2{
-	fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
+    fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let mut n = 0;
-		for p in &self.rows{
+        for p in &self.rows{
             if valid1(p){
                 n += 1;
             }
         }
         Ok(n.to_string())
-	}
-	fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
+    }
+    fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let mut n = 0;
-		for p in &self.rows{
+        for p in &self.rows{
             if valid2(p){
                 n += 1;
             }
         }
         Ok(n.to_string())
-	}
+    }
 }

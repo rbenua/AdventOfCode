@@ -8,13 +8,13 @@ use std::collections::HashMap;
 use lazy_static::lazy_static;
 
 pub struct Day4{
-	pps: Vec<HashMap<String, String>>,
+    pps: Vec<HashMap<String, String>>,
 }
 
 pub fn setup(input:&str) -> Result<Day4, Box<dyn Error>>{
-	let mut res = Day4{
-		pps: Vec::new(),
-	};
+    let mut res = Day4{
+        pps: Vec::new(),
+    };
     let re = Regex::new(r"([^: ]+):([^: ]+)")?;
     let mut curr_map = HashMap::new();
     for line_opt in read_lines(input){
@@ -33,7 +33,7 @@ pub fn setup(input:&str) -> Result<Day4, Box<dyn Error>>{
     if curr_map.len() != 0 {
         res.pps.push(curr_map);
     }
-	Ok(res)
+    Ok(res)
 }
 
 fn validate_yr(inp: &str, lower: u32, upper: u32) -> bool {
@@ -112,7 +112,7 @@ fn validate(map: &HashMap<String, String>) -> bool {
 }
 
 impl Problem for Day4{
-	fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
+    fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let mut n = 0;
         for map in &self.pps {
             if all_keys(map){
@@ -120,9 +120,9 @@ impl Problem for Day4{
             }
         }
         Ok(n.to_string())
-	}
+    }
 
-	fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
+    fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let mut n = 0;
         for map in &self.pps {
             if validate(map) {
@@ -130,5 +130,5 @@ impl Problem for Day4{
             }
         }
         Ok(n.to_string())
-	}
+    }
 }
