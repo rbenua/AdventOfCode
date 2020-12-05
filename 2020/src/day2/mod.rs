@@ -4,7 +4,10 @@ use std::error::Error;
 use regex::Regex;
 extern crate string_error;
 use string_error::new_err;
+use parse_display::{Display, FromStr};
 
+#[derive(Display, FromStr, PartialEq, Debug)]
+#[display("{lower}-{upper} {letter}: {password}")]
 pub struct Password{
     lower: usize,
     upper: usize,
@@ -37,16 +40,8 @@ pub fn setup(_input:&str) -> Result<Day2, Box<dyn Error>>{
     let mut res = Day2{
         rows: Vec::new(),
     };
-    let re = Regex::new(r"(\d+)-(\d+) (\w): (\w+)")?;
     for line_opt in read_lines(_input){
-        let line = line_opt?;
-        let caps = re.captures(&line).unwrap();
-        res.rows.push(Password{
-            lower: caps[1].parse()?,
-            upper: caps[2].parse()?,
-            letter: caps[3].chars().next().unwrap(),
-            password: caps[4].to_string(),
-        });
+        res.rows.push(line_opt?.parse()?);
     }
 	Ok(res)
 }
