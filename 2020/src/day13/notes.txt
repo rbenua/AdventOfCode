@@ -1,0 +1,8 @@
+13,x,x,41,x,x,x,x,x,x,x,x,x,569,x,29,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,19,x,x,x,23,x,x,x,x,x,x,x,937,x,x,x,x,x,37,x,x,x,x,x,x,x,x,x,x,17
+
+x % c[i] = (c[i] - i)
+x + i = 0 (mod c[i])... so it's 0 mod 
+
+x = 0  (mod 13)
+x = 3  (mod 41) 
+x = 13 (mod 569)
