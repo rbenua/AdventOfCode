@@ -6,6 +6,7 @@ extern crate string_error;
 use string_error::new_err;
 use parse_display::{Display, FromStr};
 use std::collections::HashSet;
+use std::collections::HashMap;
 
 type Grid = HashSet<(i32, i32, i32)>;
 type Grid2 = HashSet<(i32, i32, i32, i32)>;
@@ -118,10 +119,39 @@ fn step2(st: &Grid2) -> Grid2 {
     }
     res
 }
+
+fn step2_dict(st: &Grid2) -> Grid2 {
+    let mut to_check = HashMap::new();
+    for (x, y, z, w) in st {
+        for nx in x-1..x+2 {
+            for ny in y-1..y+2 {
+                for nz in z-1..z+2 {
+                    for nw in w-1..w+2 {
+                        *to_check.entry((nx, ny, nz, nw)).or_insert(0) += 1;
+                    }
+                }
+            }
+        }
+    }
+    let mut res = HashSet::new();
+    for ((x, y, z, w), nbrs) in to_check {
+        if st.contains(&(x, y, z, w)) {
+            if nbrs == 3 || nbrs == 4 { // nbrs includes the current cell, not just neighbors 
+                res.insert((x, y, z, w));
+            }
+        }
+        else {
+            if nbrs == 3 {
+                res.insert((x, y, z, w));
+            }
+        }
+    }
+    res
+}
 fn run2(st: &Grid, n: usize) -> Grid2 {
     let mut cur: Grid2 = st.iter().map(|(x,y,z)|{(*x,*y,*z,0)}).collect();
     for _ in 0..n {
-        cur = step2(&cur);
+        cur = step2_dict(&cur);
     }
     cur
 }
