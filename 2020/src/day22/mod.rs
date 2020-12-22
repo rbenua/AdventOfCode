@@ -52,9 +52,11 @@ fn run2(p1: &[u64], p2: &[u64]) -> (bool, Vec<u64>) {
     let mut seen: HashSet<(Vec<u64>, Vec<u64>)> = HashSet::new();
     //println!("Playing a new game with p1: {:?}, p2: {:?}", v1, v2);
     while v1.len() > 0 && v2.len() > 0 { 
-        if seen.contains(&(v1.clone(), v2.clone())) {
-            return (true, v1);
+        let state = (v1, v2);
+        if seen.contains(&state) {
+            return (true, state.0);
         }
+        (v1, v2) = state;
         seen.insert((v1.clone(), v2.clone()));
         
         let c1 = v1.remove(0);
