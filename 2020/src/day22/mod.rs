@@ -56,8 +56,8 @@ fn run2(p1: &[u64], p2: &[u64]) -> (bool, Vec<u64>) {
         if seen.contains(&state) {
             return (true, state.0);
         }
+        seen.insert(state.clone());
         (v1, v2) = state;
-        seen.insert((v1.clone(), v2.clone()));
         
         let c1 = v1.remove(0);
         let c2 = v2.remove(0);
