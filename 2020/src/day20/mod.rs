@@ -61,7 +61,7 @@ fn right<T>(input: &[[T; 10]; 10]) -> [T; 10] where T: Copy {
     input.map(|r|r[9])
 }
 
-fn flip_to_match<T>(data: &[[T; 10]; 10], select: &Fn(&[[T; 10]; 10]) -> [T; 10], pattern: &[T; 10]) -> [[T; 10]; 10]where T: Copy + Eq {
+fn flip_to_match<T>(data: &[[T; 10]; 10], select: &dyn Fn(&[[T; 10]; 10]) -> [T; 10], pattern: &[T; 10]) -> [[T; 10]; 10]where T: Copy + Eq {
     let mut d = *data;
     let mut i = 0;
     while select(&d) != *pattern {
@@ -134,19 +134,21 @@ impl Day20 {
         res
     }
 }
-const monster_pat: [(usize, usize); 15] = [(0,1), (1,0), (4,0), (5,1), (6,1), (7,0), (10,0), (11,1), 
+const MONSTER_PAT: [(usize, usize); 15] = [(0,1), (1,0), (4,0), (5,1), (6,1), (7,0), (10,0), (11,1), 
                                            (12,1), (13,0), (16,0), (17,1), (18,1), (19,1), (18,2)];
 
 fn check_loc(map: &Vec<Vec<bool>>, x: usize, y: usize) -> bool {
-    monster_pat[..].iter().all(|&(dx, dy)|map[y+dy][x+dx])
+    MONSTER_PAT[..].iter().all(|&(dx, dy)|map[y+dy][x+dx])
 }
 
-fn search(map: &Vec<Vec<bool>>) -> Option<usize> {
+fn search(map: &Vec<Vec<bool>>) -> Option<(usize, HashSet<(usize, usize)>)> {
     let mut monsters = 0;
+    let mut locs = HashSet::new();
     for y in 0..(map.len() - 2) {
         for x in 0..(map[0].len() - 19) {
             if check_loc(map, x, y) {
-                monsters += monster_pat.len();
+                monsters += MONSTER_PAT.len();
+                locs.extend(MONSTER_PAT[..].iter().map(|&(dx,dy)|(x+dx, y+dy)));
             }
         }
     }
@@ -154,7 +156,7 @@ fn search(map: &Vec<Vec<bool>>) -> Option<usize> {
         None
     }
     else {
-        Some(map.iter().flatten().filter(|b|**b).count() - monsters)
+        Some((map.iter().flatten().filter(|b|**b).count() - monsters, locs))
     }
 }
 
@@ -232,7 +234,25 @@ impl Problem for Day20{
         let mut map = self.stitch_tiles();
         
         for i in 1..9 {
-            if let Some(answer) = search(&map) {
+            if let Some((answer, locs)) = search(&map) {
+                let mut out_grid: Vec<String> = map.iter().enumerate().map(|(y, row_v)|{
+                    row_v.iter().enumerate().map(|(x, b)|{
+                        if *b {
+                            if locs.contains(&(x, y)) {
+                                'O'
+                            }
+                            else {
+                                '_'
+                            }
+                        }
+                        else {
+                            ' '
+                        }
+                    }).collect()
+                }).rev().collect();
+                for line in out_grid {
+                    println!("{}", line);
+                }
                 return Ok(answer.to_string());
             }
             map = rotate_vec(&map);
