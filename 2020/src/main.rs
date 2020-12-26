@@ -38,8 +38,8 @@ pub mod day24;
 pub mod day25;
 
 pub trait Problem {
-    fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>;
-    fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>;
+    fn part1<'a>(&'a mut self, _input:&str) -> Result<String, Box<dyn Error + 'a>>;
+    fn part2<'a>(&'a mut self, _input:&str) -> Result<String, Box<dyn Error + 'a>>;
 }
 
 pub fn read_lines<P>(filename: P) -> io::Lines<io::BufReader<File>>
@@ -78,7 +78,7 @@ fn main() -> Result<(), Box<dyn Error>>{
         "day25" => Box::new(day25::setup(&args[2])?),
         _ => panic!("nonexistent day"),
     };
-    println!("Part 1: {}", d.part1(&args[2])?);
-    println!("Part 2: {}", d.part2(&args[2])?);
+    println!("Part 1: {}", d.part1(&args[2]).unwrap());
+    println!("Part 2: {}", d.part2(&args[2]).unwrap());
     Ok(())
 }
