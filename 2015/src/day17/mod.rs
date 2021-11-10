@@ -9,9 +9,6 @@ use parse_display::{Display, FromStr};
 use json::*;
 use std::result::Result;
 use std::collections::{HashSet, HashMap};
-use permutator::k_permutation;
-
-
 
 pub struct Day17{
     cups: Vec<i64>,

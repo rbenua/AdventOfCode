@@ -27,8 +27,8 @@ pub mod day14;
 pub mod day15;
 pub mod day16;
 pub mod day17;
-/*
 pub mod day18;
+/*
 pub mod day19;
 pub mod day20;
 pub mod day21;
@@ -71,8 +71,8 @@ fn main() -> Result<(), Box<dyn Error>>{
         "day15" => Box::new(day15::setup(&args[2])?),
         "day16" => Box::new(day16::setup(&args[2])?),
         "day17" => Box::new(day17::setup(&args[2])?),
-        /*
         "day18" => Box::new(day18::setup(&args[2])?),
+        /*
         "day19" => Box::new(day19::setup(&args[2])?),
         "day20" => Box::new(day20::setup(&args[2])?),
         "day21" => Box::new(day21::setup(&args[2])?),
