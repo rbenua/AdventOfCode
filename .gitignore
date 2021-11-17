@@ -3,3 +3,4 @@ __pycache__
 *.pyc
 2020/target
 2015/target
+2015/.vscode/tasks.json

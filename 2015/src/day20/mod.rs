@@ -90,6 +90,7 @@ fn spawn_all(goal: usize, count: fn(usize) -> usize,
     res_ptr.load(Ordering::Acquire)
 }
 
+// my input: 33100000
 impl Problem for Day20{
     fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         Ok(spawn_all(self.goal / 10, count1, self.res_ptr.clone(), self.max_seen.clone()).to_string())

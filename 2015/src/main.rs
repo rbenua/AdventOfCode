@@ -32,11 +32,9 @@ pub mod day19;
 pub mod day20;
 pub mod day21;
 pub mod day22;
-/*
 pub mod day23;
 pub mod day24;
 pub mod day25;
-*/
 
 pub trait Problem {
     fn part1<'a>(&'a mut self, _input:&str) -> Result<String, Box<dyn Error + 'a>>;
@@ -76,11 +74,9 @@ fn main() -> Result<(), Box<dyn Error>>{
         "day20" => Box::new(day20::setup(&args[2])?),
         "day21" => Box::new(day21::setup(&args[2])?),
         "day22" => Box::new(day22::setup(&args[2])?),
-        /*
         "day23" => Box::new(day23::setup(&args[2])?),
         "day24" => Box::new(day24::setup(&args[2])?),
         "day25" => Box::new(day25::setup(&args[2])?),
-        */
         _ => panic!("nonexistent day"),
     };
     println!("Part 1: {}", d.part1(&args[2]).unwrap());
