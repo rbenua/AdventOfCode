@@ -7,6 +7,7 @@ use std::io::{self, BufRead};
 use std::path::Path;
 use std::fs::File;
 use std::error::Error;
+use std::process::Command;
 
 pub mod day1;
 pub mod day2;
@@ -46,7 +47,21 @@ where P: AsRef<Path>, {
 }
 
 fn main() -> Result<(), Box<dyn Error>>{
-    let args: Vec<String> = env::args().collect();
+    let mut args: Vec<String> = env::args().collect();
+    if args.len() <= 2 {
+        // if no day is provided and we're in a day's source directory, infer that day
+        let dir = String::from_utf8(Command::new("pwd").output().unwrap().stdout)?;
+        if dir.find("2021/src/day").is_some() {
+            let base = dir.trim().split('/').next_back().unwrap();
+            args.insert(1, base.to_string());
+            println!("inferred: {}", &args[1]);
+        }
+        if args.len() == 2 {
+            // if no input file was provided either, try input.txt
+            args.insert(2, "input.txt".to_string());
+            println!("inferred: {}", &args[2]);
+        }
+    }
     let mut d : Box<dyn Problem> = match &*args[1]{
         "day1" => Box::new(day1::setup(&args[2])?),
         "day2" => Box::new(day2::setup(&args[2])?),
@@ -73,7 +88,7 @@ fn main() -> Result<(), Box<dyn Error>>{
         "day23" => Box::new(day23::setup(&args[2])?),
         "day24" => Box::new(day24::setup(&args[2])?),
         "day25" => Box::new(day25::setup(&args[2])?),
-        _ => panic!("nonexistent day"),
+        _ => panic!("nonexistent day {}", &*args[1]),
     };
     println!("Part 1: {}", d.part1(&args[2]).unwrap());
     println!("Part 2: {}", d.part2(&args[2]).unwrap());
