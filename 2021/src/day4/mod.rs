@@ -16,7 +16,7 @@ pub struct Day4{
 pub fn setup(_input:&str) -> Result<Day4, Box<dyn Error>>{
     let mut lines = read_lines(_input);
     let first_line = lines.next().unwrap()?; 
-    let draws = first_line.split(',').map(|s|{s.trim().parse().unwrap()}).collect::<Vec<i64>>();
+    let draws = first_line.split(',').map(|s|{s.parse().unwrap()}).collect::<Vec<i64>>();
     lines.next();
     let mut res = Day4{
         draws,
@@ -30,7 +30,7 @@ pub fn setup(_input:&str) -> Result<Day4, Box<dyn Error>>{
             cur_board = Vec::new();
             continue; // suck it, joshua_
         }
-        let cur_row = line_opt.split(' ').filter(|s|{*s != ""}).map(|s|{s.trim().parse().unwrap()}).collect::<Vec<i64>>();
+        let cur_row = line_opt.split_whitespace().map(|s|{s.parse().unwrap()}).collect::<Vec<i64>>();
         cur_board.push(cur_row);
     }
     res.boards.push(cur_board);
