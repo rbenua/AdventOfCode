@@ -11,4 +11,5 @@ regex = "*"
 string-error = "*"
 lazy_static = "*"
 parse-display = "*"
-
+itertools = "*"
+permutator = "*"
