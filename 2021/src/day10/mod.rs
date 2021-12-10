@@ -12,28 +12,23 @@ pub struct Day10{
 
 pub fn setup(_input:&str) -> Result<Day10, Box<dyn Error>>{
     Ok(Day10{
-        lines: read_lines(_input).map(|x|{x.unwrap()}).collect(),
+        lines: read_lines(_input).map(Result::unwrap).collect(),
     })
 }
 
-fn find_error(line: &mut impl Iterator<Item=char>, stack: &mut Vec<char>) -> Option<char> {
-    match line.next() {
-        None => None,
-        Some(c) => {
-            if "[<({".contains(c) {
-                stack.push(c);
-                find_error(line, stack)
-            }
-            else {
-                if Some(opener(c)) != stack.pop() {
-                    Some(c)
-                }
-                else {
-                    find_error(line, stack)
-                }
+fn find_remainder(line: &String) -> Result<Vec<char>, char> {
+    let mut stack = Vec::new();
+    for c in line.chars() {
+        if "[<({".contains(c) {
+            stack.push(c);
+        }
+        else {
+            if Some(opener(c)) != stack.pop() {
+                return Err(c);
             }
         }
     }
+    Ok(stack)
 }
 
 fn opener(close: char) -> char {
@@ -67,34 +62,33 @@ fn score_remainder(close: char) -> i64 {
 }
 
 fn score_first_error(line: &String) -> i64 {
-    if let Some(close) = find_error(&mut line.chars(), &mut Vec::new()) {
-        score_missing(close)
-    }
-    else {
-        0
+    match find_remainder(&line) {
+        Ok(_) => 0,
+        Err(close) => score_missing(close),
     }
 }
 
 fn score_all_remainder(line: &String) -> Option<i64> {
-    let mut remainder = Vec::new();
-    if find_error(&mut line.chars(), &mut remainder).is_some() {
-        return None;
+    match find_remainder(line) {
+        Ok(remainder) => {
+            let mut total = 0;
+            for closer in remainder.iter().rev() {
+                total *= 5;
+                total += score_remainder(*closer);
+            }
+            Some(total)
+        },
+        Err(_) => None,
     }
-    let mut total = 0;
-    for closer in remainder.iter().rev() {
-        total *= 5;
-        total += score_remainder(*closer);
-    }
-    Some(total)
 }
 
 impl Problem for Day10{
     fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
-        let total: i64 = self.lines.iter().map(|line|{score_first_error(line)}).sum();
+        let total: i64 = self.lines.iter().map(score_first_error).sum();
         Ok(total.to_string())
     }
     fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
-        let mut scores: Vec<i64> = self.lines.iter().filter_map(|line|{score_all_remainder(line)}).collect();
+        let mut scores: Vec<i64> = self.lines.iter().filter_map(score_all_remainder).collect();
         //println!("{:?}", scores);
         scores.sort();
         let m = scores.len() / 2;
