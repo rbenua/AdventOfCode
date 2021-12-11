@@ -33,31 +33,31 @@ fn find_remainder(line: &String) -> Result<Vec<char>, char> {
 
 fn opener(close: char) -> char {
     match close {
+        ')' => '(',
         ']' => '[',
         '}' => '{',
         '>' => '<',
-        ')' => '(',
         _ => panic!("bad closer {}", close)
     }
 }
 
 fn score_missing(close: char) -> i64 {
     match close {
+        ')' => 3,
         ']' => 57,
         '}' => 1197,
         '>' => 25137,
-        ')' => 3,
         _ => panic!("bad closer {}", close)
     }
 }
 
-fn score_remainder(close: char) -> i64 {
-    match close {
+fn score_remainder(open: char) -> i64 {
+    match open {
+        '(' => 1,
         '[' => 2,
         '{' => 3,
         '<' => 4,
-        '(' => 1,
-        _ => panic!("bad closer {}", close)
+        _ => panic!("bad opener {}", open)
     }
 }
 
