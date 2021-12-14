@@ -56,8 +56,7 @@ fn fold_outside(p: &(i64, i64), fold: &Fold) -> bool {
 
 fn fold(points: &mut HashSet<(i64, i64)>, fold: &Fold){
     let mut newpts = Vec::new();
-    for pt in points.drain_filter(|p|{fold_outside(p, &fold)}) {
-        let (x, y) = pt;
+    for (x, y) in points.drain_filter(|p|{fold_outside(p, &fold)}) {
         let new = match fold {
             Fold::X(fx) => (fx - (x - fx), y),
             Fold::Y(fy) => (x, fy - (y - fy))
@@ -78,7 +77,7 @@ fn print_grid(points: &HashSet<(i64, i64)>) {
                 '#'
             }
             else {
-                '.'
+                ' '
             }
         }).collect::<String>())
     }
