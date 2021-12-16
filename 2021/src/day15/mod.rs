@@ -76,6 +76,26 @@ impl Day15{
         }
         -1
     }
+    fn search_dedup(&self, src: (usize, usize), dest: (usize, usize), risk: fn(&Day15, (usize, usize)) -> i64) -> i64 {
+        let mut to_visit = BinaryHeap::new();
+        let mut visited = HashSet::new();
+        to_visit.push(Reverse((0, src)));
+        while !to_visit.is_empty() {
+            let Reverse((cost, (x, y))) = to_visit.pop().unwrap();
+            //println!("({}, {}), {}", x, y, cost);
+            if (x, y) == dest {
+                return cost;
+            }
+            if visited.insert((x, y)) {
+                for np in nbrs(x, y, dest.0 + 1, dest.1 + 1) {
+                    if !visited.contains(&np) {
+                        to_visit.push(Reverse((cost + risk(&self, np), np)));
+                    }
+                }
+            }
+        }
+        -1
+    }
     fn search_vec(&self, src: (usize, usize), dest: (usize, usize), risk: fn(&Day15, (usize, usize)) -> i64) -> i64 {
         let mut to_visit = Vec::new();
         let mut visited = HashSet::new();
@@ -93,6 +113,30 @@ impl Day15{
                         Err(idx) => to_visit.insert(idx, new),
                         Ok(_) => (),
                     };
+                }
+            }
+        }
+        -1
+    }
+    fn search_vec_dedup(&self, src: (usize, usize), dest: (usize, usize), risk: fn(&Day15, (usize, usize)) -> i64) -> i64 {
+        let mut to_visit = Vec::new();
+        let mut visited = HashSet::new();
+        to_visit.push(Reverse((0, src)));
+        while !to_visit.is_empty() {
+            let Reverse((cost, (x, y))) = to_visit.pop().unwrap();
+            //println!("({}, {}), {}", x, y, cost);
+            if (x, y) == dest {
+                return cost;
+            }
+            if visited.insert((x, y)) {
+                for np in nbrs(x, y, dest.0 + 1, dest.1 + 1) {
+                    if !visited.contains(&np) {
+                        let new = Reverse((cost + risk(&self, np), np));
+                        match to_visit.binary_search(&new) {
+                            Err(idx) => to_visit.insert(idx, new),
+                            Ok(_) => (),
+                        };
+                    }
                 }
             }
         }
@@ -145,6 +189,34 @@ impl Day15{
         }
         -1
     }
+
+    fn search_vec_scan_dedup(&self, src: (usize, usize), dest: (usize, usize), risk: fn(&Day15, (usize, usize)) -> i64) -> i64 {
+        let mut to_visit = Vec::new();
+        let mut visited = HashSet::new();
+        to_visit.push((0, src));
+        while !to_visit.is_empty() {
+            let mut min_idx = 0;
+            for i in 1..to_visit.len() {
+                if to_visit[i] < to_visit[min_idx] {
+                    min_idx = i;
+                }
+            }
+            let (cost, (x, y)) = to_visit.remove(min_idx);
+            //println!("({}, {}), {}", x, y, cost);
+            if (x, y) == dest {
+                return cost;
+            }
+            if visited.insert((x, y)) {
+                for np in nbrs(x, y, dest.0 + 1, dest.1 + 1) {
+                    if !visited.contains(&np) {
+                        let new = (cost + risk(&self, np), np);
+                        to_visit.push(new);
+                    }
+                }
+            }
+        }
+        -1
+    }
 }
 
 fn time_invoke<T>(name: &str, f: T) -> i64 
@@ -159,16 +231,21 @@ where T: Fn() -> i64 {
 impl Problem for Day15{
     fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let res = time_invoke("part 1 min-heap", ||{self.search((0, 0), (self.xmax - 1, self.ymax - 1), Day15::risk1)});
+        time_invoke("part 1 min-heap dedup", ||{self.search_dedup((0, 0), (self.xmax - 1, self.ymax - 1), Day15::risk1)});
         time_invoke("part 1 vector bsearch reversed", ||{self.search_vec((0, 0), (self.xmax - 1, self.ymax - 1), Day15::risk1)});
+        time_invoke("part 1 vector bsearch reversed dedup", ||{self.search_vec_dedup((0, 0), (self.xmax - 1, self.ymax - 1), Day15::risk1)});
         time_invoke("part 1 vector bsearch non-reversed", ||{self.search_vec_nonrev((0, 0), (self.xmax - 1, self.ymax - 1), Day15::risk1)});
         time_invoke("part 1 vector linear scan", ||{self.search_vec_scan((0, 0), (self.xmax - 1, self.ymax - 1), Day15::risk1)});
         Ok(res.to_string())
     }
     fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let res = time_invoke("part 2 min-heap", ||{self.search((0, 0), (5 * self.xmax - 1, 5 * self.ymax - 1), Day15::risk2)});
+        time_invoke("part 2 min-heap dedup", ||{self.search_dedup((0, 0), (5 * self.xmax - 1, 5 * self.ymax - 1), Day15::risk2)});
         time_invoke("part 2 vector bsearch reversed", ||{self.search_vec((0, 0), (5 * self.xmax - 1, 5 * self.ymax - 1), Day15::risk2)});
+        time_invoke("part 2 vector bsearch reversed dedup", ||{self.search_vec_dedup((0, 0), (5 * self.xmax - 1, 5 * self.ymax - 1), Day15::risk2)});
         time_invoke("part 2 vector bsearch non-reversed", ||{self.search_vec_nonrev((0, 0), (5 * self.xmax - 1, 5 * self.ymax - 1), Day15::risk2)});
         time_invoke("part 2 vector linear scan", ||{self.search_vec_scan((0, 0), (5 * self.xmax - 1, 5 * self.ymax - 1), Day15::risk2)});
+        time_invoke("part 2 vector linear scan dedup", ||{self.search_vec_scan_dedup((0, 0), (5 * self.xmax - 1, 5 * self.ymax - 1), Day15::risk2)});
         Ok(res.to_string())
     }
 }
