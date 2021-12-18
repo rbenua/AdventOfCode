@@ -1,0 +1,12 @@
+inferred: day18
+
+
+
+
+
+
+
+
+
+Part 1: 3488
+Part 2: 
