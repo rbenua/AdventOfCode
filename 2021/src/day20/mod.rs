@@ -90,13 +90,17 @@ fn printgrid(img: &Image) {
             ymin = *y;
         }
     } 
-    println!("default: {}, x={}..{}, y={}..{}", ch(img.default), xmin, xmax, ymin, ymax);
+    let hash_size = img.known.len();
+    let grid_size = (xmax - xmin) * (ymax - ymin);
+    println!("default: {}, x={}..{}, y={}..{}, hash {} grid {}", ch(img.default), xmin, xmax, ymin, ymax, hash_size, grid_size);
 
+    /*
     for y in ymin..(ymax+1) {
         println!("{}", (xmin..(xmax+1)).map(|x|{
             ch(*img.known.get(&(x, y)).unwrap_or(&img.default))
         }).collect::<String>());
     }
+    */
 }
 
 impl Problem for Day20{
@@ -118,7 +122,7 @@ impl Problem for Day20{
         //printgrid(&img);
         for _i in 0..50 {
             img = step(&self.conv, &img);
-            //println!("done {}", i);
+            printgrid(&img);
         }
         if img.default {
             return Err(new_err("infinite result"));

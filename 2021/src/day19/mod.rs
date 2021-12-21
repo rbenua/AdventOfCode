@@ -255,7 +255,7 @@ impl Problem for Day19{
         let mut max = 0;
         for i in 0..(aligned.len() - 1) {
             let cur = aligned[i].offset.unwrap();
-            let best = *(&aligned[i..].iter().map(|new|cur.mdist(&new.offset.unwrap())).max().unwrap());
+            let best = aligned[(i+1)..].iter().map(|new|cur.mdist(&new.offset.unwrap())).max().unwrap();
             if best > max {
                 max = best;
             }
