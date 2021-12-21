@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 #![allow(unused_mut)]
 #![allow(dead_code)]
-//#![feature(destructuring_assignment)]
+#![feature(destructuring_assignment)]
 #![feature(hash_drain_filter)]
 use std::env;
 use std::io::{self, BufRead};
