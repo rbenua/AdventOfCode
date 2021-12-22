@@ -12,7 +12,13 @@ struct Region{
     x: (i64, i64),
     y: (i64, i64),
     z: (i64, i64),
-    mul: i64,
+    on: bool    
+}
+
+impl std::fmt::Display for Region{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} x={:?},y={:?},z={:?}", if self.on {"on"} else {"off"}, self.x, self.y, self.z)
+    }
 }
 
 pub struct Day22{
@@ -25,11 +31,11 @@ pub fn setup(_input:&str) -> Result<Day22, Box<dyn Error>>{
     for line_opt in read_lines(_input) {
         let line = line_opt?;
         let cs = re.captures(&line).ok_or(new_err(&format!("regex didn't match {}", line)))?;
-        let mul = if &cs[1] == "on" {1} else {0};
+        let on = &cs[1] == "on";
         let x = (cs[2].parse()?, cs[3].parse()?);
         let y = (cs[4].parse()?, cs[5].parse()?);
         let z = (cs[6].parse()?, cs[7].parse()?);
-        regions.push(Region{mul, x, y, z});
+        regions.push(Region{on, x, y, z});
     }
     Ok(Day22{regions})
 }
@@ -59,7 +65,7 @@ fn step(reg: &Region, map: &mut HashSet<(i64, i64, i64)>) {
     for x in clamp(-50, reg.x.0, 50)..(clamp(-50, reg.x.1, 50)+1) {
         for y in clamp(-50, reg.y.0, 50)..(clamp(-50, reg.y.1, 50)+1) {
             for z in clamp(-50, reg.z.0, 50)..(clamp(-50, reg.z.1, 50)+1) {
-                if reg.mul == 1 {
+                if reg.on {
                     map.insert((x, y, z));
                 }
                 else {
@@ -82,34 +88,47 @@ fn max(a: i64, b: i64) -> i64 {
 fn min(a: i64, b: i64) -> i64 {
     if a < b {a} else {b}
 }
-fn intersection(r1: &Region, r2: &Region) -> Region {
-    Region{
-        x: (max(r1.x.0, r2.x.0), min(r1.x.1, r2.x.1)),
-        y: (max(r1.y.0, r2.y.0), min(r1.y.1, r2.y.1)),
-        z: (max(r1.z.0, r2.z.0), min(r1.z.1, r2.z.1)),
-        mul: r1.mul
+fn does_intersect(r1: &Region, r2: &Region) -> bool {
+       (r1.x.1 >= r2.x.0 && r1.x.0 <= r2.x.1)
+    && (r1.y.1 >= r2.y.0 && r1.y.0 <= r2.y.1)
+    && (r1.z.1 >= r2.z.0 && r1.z.0 <= r2.z.1)
+}
+fn intersection(r1: &Region, r2: &Region) -> Option<Region> {
+    if does_intersect(r1, r2) {
+        Some(Region{
+            x: (max(r1.x.0, r2.x.0), min(r1.x.1, r2.x.1)),
+            y: (max(r1.y.0, r2.y.0), min(r1.y.1, r2.y.1)),
+            z: (max(r1.z.0, r2.z.0), min(r1.z.1, r2.z.1)),
+            on: !r1.on
+        })
+    }
+    else {
+        None
     }
 }
 
-fn vol(r: &Region) -> i128 {
-    ((r.x.1 - r.x.0) as i128) * 
-    ((r.y.1 - r.y.0) as i128) * 
-    ((r.z.1 - r.z.0) as i128) *
-    (r.mul as i128)
+fn vol(r: &Region) -> i64 {
+    let res = 
+    (r.x.1 - r.x.0 + 1) * 
+    (r.y.1 - r.y.0 + 1) * 
+    (r.z.1 - r.z.0 + 1) *
+    if r.on {1} else {-1};
+    //println!("vol({}) = {}", r, res);
+    res
 }
 
-fn add_region(r: Region, all: &mut Vec<Region>) {
-    let mut contained = false;
-    let mut i = 0;
-    while i < all.len() { 
-        let other = &all[i];
-        if contains_region(&r, other) {
-            all.remove(i);
-            continue;
+fn add_region(r: Region, vols: &mut Vec<Region>) {
+    //println!("adding region {}", r);
+    let mut new_vols = Vec::new();
+    for other in vols.iter() {
+        if let Some(int) = intersection(other, &r) {
+            //println!("intersection with {}: {} ({})", other, int, vol(&int));
+            new_vols.push(int);
         }
     }
-    if !contained && r.mul == 1 {
-        all.push(r);
+    vols.extend(new_vols.drain(..));
+    if r.on {
+        vols.push(r);
     }
 }
 
@@ -123,6 +142,11 @@ impl Problem for Day22{
         Ok(map.len().to_string())
     }
     fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
-        Ok("".to_string())
+        let mut vols = Vec::new();
+        for region in &self.regions {
+            add_region(*region, &mut vols);
+        }
+        let total = vols.iter().map(vol).sum::<i64>();
+        Ok(total.to_string())
     }
 }
