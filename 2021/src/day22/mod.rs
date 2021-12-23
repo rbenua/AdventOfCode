@@ -76,10 +76,10 @@ fn step(reg: &Region, map: &mut HashSet<(i64, i64, i64)>) {
     }
 }
 
-fn contains_region(r1: &Region, r2: &Region) -> bool {
-       r1.x.0 <= r2.x.0 && r1.x.1 >= r2.x.1 
-    && r1.y.0 <= r2.y.0 && r1.y.1 >= r2.y.1 
-    && r1.z.0 <= r2.z.0 && r1.z.1 >= r2.z.1 
+fn equals_region(r1: &Region, r2: &Region) -> bool {
+       r1.x.0 == r2.x.0 && r1.x.1 == r2.x.1 
+    && r1.y.0 == r2.y.0 && r1.y.1 == r2.y.1 
+    && r1.z.0 == r2.z.0 && r1.z.1 == r2.z.1 
 }
 
 fn max(a: i64, b: i64) -> i64 {
@@ -132,6 +132,34 @@ fn add_region(r: Region, vols: &mut Vec<Region>) {
     }
 }
 
+fn add_region_dedup(r: &Region, vols: &mut Vec<Region>) {
+    // println!("adding region {}", r);
+    let mut new_vols = Vec::new();
+    let mut i = 0;
+    while i < vols.len() {
+        let other = &vols[i];
+        if let Some(int) = intersection(other, r) {
+            // println!("intersection with {}: {} ({}, {})", other, int, vol(&int), 
+                    //  if equals_region(other, &int) {"dedup"} else {"push"});
+            if equals_region(other, &int) {
+                vols.remove(i);
+            }
+            else {
+                new_vols.push(int);
+                i += 1;
+            }
+        }
+        else {
+            i += 1;
+        }
+    }
+    vols.extend(new_vols.drain(..));
+    if r.on {
+        // println!("final region {} ({})", r, vol(&r));
+        vols.push(r.clone());
+    }
+}
+
 
 impl Problem for Day22{
     fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
@@ -146,7 +174,14 @@ impl Problem for Day22{
         for region in &self.regions {
             add_region(*region, &mut vols);
         }
+        let mut vols_dedup = Vec::new();
+        for region in &self.regions {
+            add_region_dedup(region, &mut vols_dedup);
+        }
+        println!("{} regions ({} dedup)", vols.len(), vols_dedup.len());
         let total = vols.iter().map(vol).sum::<i64>();
-        Ok(total.to_string())
+        let total_dedup = vols_dedup.iter().map(vol).sum::<i64>();
+        assert_eq!(total, total_dedup);
+        Ok(format!("{}", total))
     }
 }
