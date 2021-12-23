@@ -36,16 +36,18 @@ where Self: std::fmt::Debug + Copy + Clone + Ord + PartialOrd + Eq + PartialEq +
     fn try_remove(&mut self, c: usize) -> Option<usize> {
         let mut res = None;
         let mut all_sat = true;
-        for place in self.into_iter() {
+        let mut rpos = None;
+        for (place, pos) in self.into_iter().zip(0..) {
             if res.is_none() && place.is_some() {
                 res = place;
+                rpos = Some(pos);
             }
             if place.unwrap_or(c) != c {
                 all_sat = false;
             }
         }
         if !all_sat {
-            let pos = self.into_iter().position(|p|p == res).unwrap();
+            let pos = rpos.unwrap();
             self[pos] = None;
             return res;
         }
@@ -215,14 +217,13 @@ impl<T: Alcove> State<T>{
     fn fixed_cost(&self) -> usize {
         (0..4).map(|c|self.alcoves[c].fixed_cost(c)).sum()
     }
-}
+} // impl<T: Alcove> State<T>
 
 fn search<T: Alcove>(start: &State<T>) -> Option<usize> {
     let mut to_visit = BinaryHeap::new();
     let mut visited = HashSet::new();
     to_visit.push(Reverse((0, start.clone())));
-    while !to_visit.is_empty() {
-        let Reverse((cost, curr_state)) = to_visit.pop().unwrap();
+    while let Some(Reverse((cost, curr_state))) = to_visit.pop() {
         if curr_state.solved() {
             return Some(cost);
         }
