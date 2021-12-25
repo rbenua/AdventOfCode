@@ -163,46 +163,22 @@ fn make_deque(mut i: i64) -> VecDeque<i64> {
         d.push_front(i % 10);
         i = i / 10;
     }
+    while d.len() < 14 {
+        d.push_front(0);
+    }
     d
 }
 
-const NTHREADS: i64 = 24;
 
 impl Problem for Day24{
     fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
-        let mut handles = Vec::new();
-        let (tx, rx) = channel::<i64>();
-        let flag = Arc::new(AtomicBool::new(true));
-        for tid in 0..NTHREADS {
-            let prog = self.program.clone();
-            let t = tx.clone();
-            let f = flag.clone();
-            let handle = thread::spawn(move ||{
-                let mut i = 99999999999999 - tid;
-                let mut loops = 0u64;
-                while i >= 0 && f.load(Ordering::Relaxed) {
-                    let mut machine = new_machine(&prog, make_deque(i));
-                    machine.execute();
-                    if machine.regs[Z] == 0 {
-                        println!("Thread {} found match {}: {}", tid, i, machine);
-                        t.send(i).unwrap();
-                        return;
-                    }
-                    i -= NTHREADS;
-                    loops += 1;
-                    if loops % 10000000 == 0 {
-                        println!("Thread {} completed {} loops: {}", tid, loops, machine);
-                    }
-                }
-            });
-            handles.push(handle);
+        for i in 22222222222221..22222222222230 {
+            let mut machine = new_machine(&self.program, make_deque(i));
+            println!("{}", machine);
+            machine.execute();
+            println!("{}", machine);
         }
-        let res = rx.recv()?;
-        flag.store(false, Ordering::Relaxed);
-        for handle in handles {
-            handle.join().unwrap();
-        }
-        Ok(res.to_string())
+        Ok("".to_string())
     }
     fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         Ok("".to_string())

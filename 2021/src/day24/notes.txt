@@ -1,0 +1,11 @@
+w = input
+
+x = z % 26 + (11,12,14,etc)
+z /= 26 (sometimes)
+x = x != w
+
+y = 25 * x + 1
+z = z * y
+
+y = (w + 7) * x
+z += y

@@ -3,7 +3,6 @@
 #![allow(dead_code)]
 #![feature(destructuring_assignment)]
 #![feature(hash_drain_filter)]
-#![feature(associated_type_bounds)]
 use std::env;
 use std::io::{self, BufRead};
 use std::path::Path;
