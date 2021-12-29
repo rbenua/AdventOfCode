@@ -1,3 +1,8 @@
+# ignore all files without extensions
+*
+!*.*
+!*/
+
 *.swp
 __pycache__
 *.pyc
@@ -5,4 +10,5 @@ __pycache__
 2015/target
 2015/.vscode/tasks.json
 2021/target
-2021-hs/dist-newstyle
+*.hi
+*.o
