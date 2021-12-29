@@ -1,6 +1,5 @@
 import System.IO
 import System.Environment
-import System.Posix.Internals (puts)
 
 main :: IO ()
 main = do
