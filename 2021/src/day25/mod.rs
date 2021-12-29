@@ -18,9 +18,7 @@ pub fn setup(_input:&str) -> Result<Day25, Box<dyn Error>>{
     let mut xsize = 0;
     for (line_opt, y) in read_lines(_input).zip(0..) {
         let line = line_opt?;
-        if line.len() as i64 > xsize {
-            xsize = line.len() as i64;
-        }
+        xsize = line.len() as i64;
         ysize = y + 1;
         rights.extend(line.match_indices('>').map(|(x,_)|(x as i64, y)));
         downs.extend(line.match_indices('v').map(|(x,_)|(x as i64, y)));
@@ -89,14 +87,9 @@ impl State{
 impl Problem for Day25{
     fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         let mut curr = self.init_state.clone();
-        println!("init state:");
-        println!("{}", curr);
         for i in 1usize.. {
             let new = curr.step();
-            // println!("after step {}:", i);
-            // println!("{}", new);
             if new == curr {
-                // println!("stopped!");
                 return Ok(i.to_string());
             }
             curr = new;

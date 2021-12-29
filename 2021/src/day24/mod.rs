@@ -13,6 +13,7 @@ use std::thread;
 use std::sync::mpsc::channel;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::io::{stdout, Write};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 enum Arg{
@@ -101,6 +102,7 @@ pub fn setup(_input:&str) -> Result<Day24, Box<dyn Error>>{
     Ok(Day24{program})
 }
 
+#[derive(Debug, Clone)]
 struct Machine<'a>{
     program: &'a Vec<Insn>,
     regs: EnumMap<Register, i64>,
@@ -131,16 +133,21 @@ impl<'a> Machine<'a>{
         }
 
         let insn = &self.program[self.pc];
-        self.pc += 1;
-
         match insn {
-            Inp(r) => self.regs[*r] = self.input.pop_front().unwrap(),
+            Inp(r) => self.regs[*r] = {
+                println!("{}", self);
+                match self.input.pop_front() {
+                    None => return false,
+                    Some(i) => i,
+                }
+            },
             Add(r, a) => self.regs[*r] += self.arg(a),
             Mul(r, a) => self.regs[*r] *= self.arg(a),
             Div(r, a) => self.regs[*r] /= self.arg(a),
             Mod(r, a) => self.regs[*r] %= self.arg(a),
             Eql(r, a) => self.regs[*r] = if self.regs[*r] == self.arg(a) {1} else {0},
         }
+        self.pc += 1;
         true
     }
     
@@ -169,16 +176,122 @@ fn make_deque(mut i: i64) -> VecDeque<i64> {
     d
 }
 
+fn process(idx: usize, mut z: i64, w: i64) -> i64 {
+    const XOFFS: [i64; 14] = [14, 12, 11, -4, 10, 10, 15, -9, -9, 12, -15, -7, -10, 0];
+    const ZOFFS: [i64; 14] = [7, 4, 8, 1, 5, 14, 12, 10, 5, 7, 6, 8, 4, 6];
+    let x = z % 26 + XOFFS[idx];
+    if [3, 7, 8, 10, 11, 12, 13].contains(&idx) {
+        z = z / 26;
+    }
+    if w != x {
+        z *= 26;
+        z += w + ZOFFS[idx];
+    }
+    z
+}
+fn increment(mut i: i64, nthreads: i64) -> i64 {
+    for _c in 0..nthreads {
+        i += 1;
+        let mut c = 0;
+        let mut p = 10;
+        while (i % p) == 0 {
+            c += p / 10;
+            p *= 10;
+        }
+        i += c;
+    }
+    i
+}
 
 impl Problem for Day24{
     fn part1(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
-        for i in 22222222222221..22222222222230 {
-            let mut machine = new_machine(&self.program, make_deque(i));
-            println!("{}", machine);
-            machine.execute();
-            println!("{}", machine);
+        /*
+        let mut i = 29599469991739;
+        println!("{}", "93719996499592".chars().rev().collect::<String>());
+        let mut z = 0;
+        let mut power = 10i64.pow(13);
+        for idx in 0..14 {
+            let w = (i / power) % 10;
+            let nz = process(idx, z, w);
+            println!("process({}, {}, {}) = {}", idx, z, w, nz);
+            z = nz;
+            power /= 10;
         }
-        Ok("".to_string())
+        let d = make_deque(i);
+        let mut machine = new_machine(&self.program, d);
+        machine.execute();
+        println!("{}", machine);
+        */
+        /*
+        Ok(machine.regs[Z].to_string())
+        for first_i in (0..10000000).rev() {
+            if first_i % 100000 == 0 {
+                print!(".");
+                std::io::stdout().flush()?;
+            }
+            let mut first_half = make_deque(first_i);
+            let mut z = 0;
+            for idx in 0..7 {
+                z = process(idx, z, first_half.pop_front().unwrap());
+            }
+            let mut total = first_i;
+            for idx in 7..14 {
+                let (nz, i) = (1..10).map(|i|{
+                    (process(idx, z, i), i)
+                }).min().unwrap();
+                total *= 10;
+                total += i;
+                z = nz;
+                println!("digit {} best value is {}, z={}", idx, total, z);
+            }
+            if z == 0 {
+                println!();
+                return Ok(total.to_string());
+            }
+        }
+        */
+        const NTHREADS: i64 = 10;
+        let mut handles = Vec::new();
+        let (tx, rx) = channel::<i64>();
+        let flag = Arc::new(AtomicBool::new(true));
+        for tid in 0..NTHREADS {
+            let t = tx.clone();
+            let f = flag.clone();
+            let handle = thread::spawn(move ||{
+                // let mut i = 11111111111111 + tid;
+                let mut i = 11438311111111 + tid;
+                while i >= 0 && f.load(Ordering::Relaxed) {
+                    let mut z = 0;
+                    let mut power = 10i64.pow(13);
+                    for idx in 0..14 {
+                        z = process(idx, z, (i / power) % 10);
+                        power /= 10;
+                    }
+                    if z == 0 {
+                        println!("Thread {} found match {}", tid, i);
+                        let d = make_deque(i);
+                        if d.contains(&0) {
+                            println!("contains zeroes, continuing");
+                            i = increment(i, NTHREADS);
+                            continue;
+                        }
+                        t.send(i).unwrap();
+                        return;
+                    }
+                    i = increment(i, NTHREADS);
+                    if i % 100000000 == 11111111 {
+                        println!("Thread {} completed up to {}", tid, i);
+                    }
+                }
+            });
+            handles.push(handle);
+        }
+        let res = rx.recv()?;
+        flag.store(false, Ordering::Relaxed);
+        for handle in handles {
+            handle.join().unwrap();
+        }
+        Ok(res.to_string())
     }
     fn part2(&mut self, _input:&str) -> Result<String, Box<dyn Error>>{
         Ok("".to_string())
