@@ -11,8 +11,8 @@ main = do
     let rows = lines input
     let (gamma, epsilon) = gammaEpsilon rows
     putStrLn $ "Part 1: " ++ show (parseBinary gamma * parseBinary epsilon)
-    let o2 = searchO2 "" rows
-    let co2 = searchCO2 "" rows
+    let o2 = search (fst . gammaEpsilon) "" rows
+    let co2 = search (snd . gammaEpsilon) "" rows
     printf "o2: %s (%d), co2: %s (%d)\n" o2 (parseBinary o2) co2 (parseBinary co2)
     printf "Part 2: %d\n" $ parseBinary o2 * parseBinary co2
 
@@ -27,20 +27,10 @@ gammaEpsilon rows =
 parseBinary :: String -> Int 
 parseBinary = foldl (\rest c -> 2 * rest + if c == '1' then 1 else 0) 0
 
-searchO2 :: String -> [String] -> String
-searchO2 prefix [] = prefix
-searchO2 prefix [a] = prefix ++ a
-searchO2 prefix rows =
-    let (gamma, epsilon) = gammaEpsilon rows
-        f = head gamma
-        rest = [r | (h:r) <- rows, h == f]
-    in searchO2 (prefix ++ [f]) rest
-
-searchCO2 :: String -> [String] -> String
-searchCO2 prefix [] = prefix
-searchCO2 prefix [a] = prefix ++ a
-searchCO2 prefix rows =
-    let (gamma, epsilon) = gammaEpsilon rows
-        f = head epsilon 
-        rest = [r | (h:r) <- rows, h == f]
-    in searchCO2 (prefix ++ [f]) rest
+search :: ([String] -> String) -> String -> [String] -> String
+search sel prefix [] = prefix
+search sel prefix [a] = prefix ++ a
+search sel prefix rows =
+    let f = head $ sel rows
+        rest = [r | h:r <- rows, h == f]
+    in search sel (prefix ++ [f]) rest
