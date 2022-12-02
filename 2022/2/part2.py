@@ -9,7 +9,7 @@ for line in f:
     s = yours + 1
     if yours == theirs:
         s += 3
-    elif yours == theirs + 1 or (yours == 0 and theirs == 2):
+    elif yours == (theirs + 1) % 3:
         s += 6
     score += s
 print(score)
