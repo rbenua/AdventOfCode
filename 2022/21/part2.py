@@ -49,7 +49,7 @@ def evaluate(node):
                 case "*":
                     return evaluate(fst) * evaluate(snd)
                 case "/":
-                    return evaluate(fst) // evaluate(snd)
+                    return evaluate(fst) / evaluate(snd)
                 case _:
                     print("Bad operator", op)
                     raise ValueError
@@ -70,7 +70,7 @@ def part2(node, prev):
             case "+": # goal = other + prev
                 return goal - other
             case "*":
-                return goal // other
+                return goal / other
             case "-":
                 if prev == right: # goal = other - prev
                     return other - goal
@@ -78,11 +78,15 @@ def part2(node, prev):
                     return goal + other
             case "/":
                 if prev == right: # goal = other / prev
-                    return other // goal
+                    return other / goal
                 else: # goal = prev / other
                     return goal * other 
             case _:
                 print("bad operator", op)
                 raise ValueError
 
+print(evaluate("root"))
 print(part2(rev["humn"], "humn"))
+print()
+fwd["humn"] = 3059361893920
+print(evaluate(fwd["root"][0]), evaluate(fwd["root"][2]))

@@ -37,6 +37,7 @@ height = 0
 occupied = set()
 offset = 0
 DOWN = (0, -1)
+cache = {}
 
 def testpt(pt, dir):
     (nx, ny) = padd(pt, dir)
@@ -44,6 +45,28 @@ def testpt(pt, dir):
 
 def testshape(shape, dir):
     return all([testpt(p, dir) for p in shape])
+
+def testrows(off):
+    for col in range(7):
+        if (col, off) not in occupied and (col, off + 1) not in occupied and (col, off + 2) not in occupied:
+            return False
+    return True
+
+def prune():
+    global occupied, offset, height
+    pruned = False
+    for off in range(height - 2, 0, -1):
+        if testrows(off):
+            pruned = True
+            offset += off
+            height -= off
+            new = set()
+            for (x, y) in occupied:
+                if y >= off:
+                    new.add((x, y - off))
+            occupied = new
+            return True
+    return False
 
 def step():
     global jetidx, shapeidx, height, occupied, DOWN
@@ -71,7 +94,24 @@ def printgrid():
 
 for n in range(1000000000000): # non-starter.
     step()
-    if n % 1000 == 0:
-        print(n)
-    #printgrid()
-print(height)
+    prune()
+    key = (shapeidx, jetidx, frozenset(occupied))
+    prev = cache.get(key)
+    if prev is None:
+        cache[key] = (n, offset)
+    else:
+        (pn, poff) = prev
+        dn = n - pn
+        doff = offset - poff
+        print("Found cycle of length", dn, ", height", doff)
+        rem = 1000000000000 - 1 - n
+        skip_cycles = rem // dn
+        skipn = skip_cycles * dn
+        skiph = skip_cycles * doff
+        left = 1000000000000 - 1 - (n + skipn)
+        offset += skiph
+        for _ in range(left):
+            step()
+            prune()
+        break
+print(height + offset)
