@@ -64,35 +64,48 @@ def follow(input, map):
 
 def followrev(input, map):
     nextdiff = max(seeds)
+    outdiff = max(seeds)
+    rs = []
+    id = True
     for (dest, src, len) in map:
-        if input < dest and (dest - input) < nextdiff:
-            nextdiff = dest - input
+        if input >= src and input < src + len:
+            id = False
+        if input < dest and (dest - input) < outdiff:
+            outdiff = dest - input
         if input >= dest and input < dest + len:
             res = src + (input - dest)
             nextdiff = dest + len - input
-            print(f"{input} => {res}")
-            return (res, nextdiff)
-    print(f"{input} => {input}")
-    return (input, nextdiff)
+            rs.append(res)
+    if id:
+        rs.append(input)
+        if outdiff < nextdiff:
+            nextdiff = outdiff
+    #print(f"{input} => {rs}, diff {nextdiff}")
+    return (rs, nextdiff)
 
-def locseed(loc):
-    init = loc 
+def locseeds(loc):
+    curr = [loc] 
     mindiff = max(seeds)
     for map in reversed(maps):
-        (loc, diff) = followrev(loc, map)
-        if diff < mindiff:
-            mindiff = diff
-    print(f"loc {init} => seed {loc}, mindiff {mindiff}")
-    return (loc, mindiff)
+        next = []
+        for c in curr:
+            (res, diff) = followrev(c, map)
+            if diff < mindiff:
+                mindiff = diff
+            next += res
+        curr = next
+    print(f"loc {loc} => seed {curr}, mindiff {mindiff}")
+    return (curr, mindiff)
 
 loc = 0
 while True:
-    (seed, diff) = locseed(loc)
+    (seeds, diff) = locseeds(loc)
     for (start, len) in seedpairs:
-        if seed >= start and seed < start + len:
-            print(loc)
-            exit()
-        if seed < start and seed + diff >= start:
-            print(loc + start - seed)
-            exit()
+        for seed in seeds:
+            if seed >= start and seed < start + len:
+                print(loc)
+                exit()
+            if seed < start and seed + diff >= start:
+                print(loc + start - seed)
+                exit()
     loc += diff
