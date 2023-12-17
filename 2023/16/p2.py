@@ -80,4 +80,14 @@ starts = chain(
     zip(zip(range(len(grid[0])), repeat(0)), repeat(down)),
     zip(zip(range(len(grid[0])), repeat(len(grid) - 1)), repeat(up)))
 
-print(max(propagate(*start) for start in starts))
+# oh, okay, generator expressions can be stacked up like this too
+maxy = len(grid)
+maxx = len(grid[0])
+starts2 = chain(
+    (((0, y), right) for y in range(maxy)),
+    (((len(grid[0]) - 1, y), left) for y in range(maxy)),
+    (((x, 0), down) for x in range(maxx)),
+    (((x, len(grid) - 1), up) for x in range(maxx))
+)
+
+print(max(propagate(*start) for start in starts2))
