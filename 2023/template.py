@@ -15,6 +15,10 @@ def nbrs(p, mx, my):
     all = [(x+1,y),(x-1,y),(x,y+1),(x,y-1)]
     return [(x, y) for (x, y) in all if 0 <= x < mx and 0 <= y < my]
 
+up = (0, -1)
+down = (0, 1)
+left = (-1, 0)
+right = (1, 0)
 
 def mdist(a, b):
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
