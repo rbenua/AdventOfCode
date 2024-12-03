@@ -12,3 +12,4 @@ __pycache__
 2021/target
 *.hi
 *.o
+.vscode

@@ -39,9 +39,13 @@ main = do
         name:_ -> name
     return ()
 
-data Node = Input Int | Bot Int | Output Int deriving (Eq, Ord, Show)
+data Source = Input Int | Lower Int | Upper Int deriving (Eq, Ord, Show)
 
-forwardEdges :: String -> [(Node, S.Set Node)]
-forwardEdges line | "input" `isPrefixOf` line =
+parseLine :: M.Map Int [Source] -> String -> M.Map Int [Source]
+parseLine m line | "value" `isPrefixOf` line =
     let [in_id, bot_id] = map read $ search isDigit line
-    in [(Input in_id, S.singleton $ Bot bot_id)]
+    in M.insertWith (++) bot_id [Input in_id] m
+
+parseLine m line =
+    let [source_bot, low_dest, high_dest] = map read $ search isDigit line
+    in M.insertWith (++) low_dest [Lower source_bot] $ M.insertWith (++) high_dest [Upper source_bot] m
