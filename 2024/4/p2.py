@@ -46,19 +46,22 @@ my = len(rows)
 def get(p):
     return rows[p[1]][p[0]]
 
-def check(x, y, dir):
+def check(x, y):
     p = (x, y)
     if get(p) != "A":
         return False
-    for i in range(4):
-        if get(padd(p, dirs[(dir + i) % 4])) != "MMSS"[i]:
-            return False
-    return True
+    for dir in range(4):
+        found = True
+        for i in range(4):
+            if get(padd(p, dirs[(dir + i) % 4])) != "MMSS"[i]:
+                found = False
+        if found:
+            return True
+    return False
 
 total = 0
 for y in range(1, my - 1):
     for x in range(1, mx - 1):
-        for dir in range(4):
-            if check(x, y, dir):
-                total += 1
+        if check(x, y):
+            total += 1
 print(total)
