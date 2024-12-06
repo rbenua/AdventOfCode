@@ -122,10 +122,15 @@ while clamp(curr, mx, my) == curr:
 
 total = 0
 for (cx, cy) in initial_visits:
-    rows = [row.copy() for row in orig_rows]
-    cols = [col.copy() for col in orig_cols]
-    insort(rows[cy], cx)
-    insort(cols[cx], cy)
-    if check(rows, cols):
+    #rows = [row.copy() for row in orig_rows]
+    #cols = [col.copy() for col in orig_cols]
+    row_idx = bisect(orig_rows[cy], cx)
+    orig_rows[cy].insert(row_idx, cx)
+    col_idx = bisect(orig_cols[cx], cy)
+    orig_cols[cx].insert(col_idx, cy)
+    if check(orig_rows, orig_cols):
         total += 1
+    del orig_rows[cy][row_idx]
+    del orig_cols[cx][col_idx]
+    
 print(total)
