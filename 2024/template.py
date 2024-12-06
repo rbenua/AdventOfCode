@@ -35,3 +35,6 @@ def pmod(p, mx, my):
 def cnbrs(c):
     x, y, z = c
     return [(x+1,y,z), (x-1,y,z), (x,y+1,z), (x,y-1,z), (x,y,z+1), (x,y,z-1)]
+
+def clamp(p, mx, my):
+    return (min(mx - 1, max(p[0], 0)), min(my - 1, max(p[1], 0)))
