@@ -4,6 +4,7 @@ import sys
 import re
 from collections import deque
 from collections import defaultdict
+from functools import cache
 
 f = open(sys.argv[1], "r")
 
@@ -41,11 +42,8 @@ def clamp(p, mx, my):
 
 state = nums(f.read())
 
-memo = {}
+@cache
 def expand(start, steps):
-    r = memo.get((start, steps))
-    if r is not None:
-        return r
     if steps == 0:
         res = 1
     elif start == 0:
@@ -57,7 +55,6 @@ def expand(start, steps):
         res = expand(left, steps - 1) + expand(right, steps - 1)
     else:
         res = expand(start * 2024, steps - 1)
-    memo[(start, steps)] = res
     return res
 
 print(sum(expand(start, 75) for start in state))

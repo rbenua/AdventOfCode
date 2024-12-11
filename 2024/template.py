@@ -4,6 +4,7 @@ import sys
 import re
 from collections import deque
 from collections import defaultdict
+from functools import cache
 
 f = open(sys.argv[1], "r")
 
