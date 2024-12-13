@@ -47,3 +47,24 @@ def cnbrs(c):
 
 def clamp(p, mx, my):
     return (min(mx - 1, max(p[0], 0)), min(my - 1, max(p[1], 0)))
+
+machines = []
+
+for block in f.read().strip().split("\n\n"):
+    machines.append(tuple(nums(block)))
+
+def cost(a, b, g, n):
+    rem = psub(g, pmul(a, n))
+    if pmod(rem, *b) != (0, 0) or rem[0] // b[0] != rem[1] // b[1]:
+        return None
+    return n * 3 + rem[0] // b[0]
+
+total = 0
+for (ax, ay, bx, by, gx, gy) in machines:
+    a = (ax, ay)
+    b = (bx, by)
+    g = (gx, gy)
+    res = [cost(a, b, g, n) for n in range(100)]
+    if any(True for r in res if r is not None):
+        total += min(r for r in res if r is not None)
+print(total)
