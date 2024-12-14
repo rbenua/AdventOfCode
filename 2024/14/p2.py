@@ -60,7 +60,6 @@ for line in f:
     robots.append(((x, y), (dx, dy)))
 
 def printgrid():
-    print()
     locs = {p for (p, v) in robots}
     for y in range(my):
         for x in range(mx):
@@ -77,13 +76,13 @@ def conn():
     return total
 
 max_conn = 0
-for iter in range(1, 50000):
+for iter in range(1, (mx * my) + 1):
     for i in range(len(robots)):
         (p, v) = robots[i]
         np = pmod(padd(p, v), mx, my)
         robots[i] = (np, v)
     c = conn()
     if c > max_conn:
-        print(iter)
         printgrid()
+        print(iter)
         max_conn = c
