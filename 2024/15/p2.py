@@ -114,5 +114,4 @@ for move in moves.strip():
         trypush(b, dir, True)
     robot = new
 
-print(boxes)
 print(sum(y * 100 + x for ((x, y), _) in boxes))
