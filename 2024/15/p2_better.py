@@ -95,7 +95,7 @@ def trypush(box, dir, doit):
     return res
     
 def printgrid():
-    print("\x1b[H")
+    print("\x1b[H") # move cursor to 0,0
     for y in range(my):
         x = 0
         while x < mx * 2 + 1:
@@ -111,8 +111,8 @@ def printgrid():
             x += 1
         print()
 
-print("\x1b[2J")
-print("\x1b[?25l")
+print("\x1b[2J") # clear screen
+print("\x1b[?25l") # hide cursor
 for move in moves.strip():
     printgrid()
     if move == "\n": 
@@ -133,5 +133,5 @@ for move in moves.strip():
     robot = new
 
 printgrid()
-print("\x1b[?25h")
+print("\x1b[?25h") # show cursor
 print(sum(y * 100 + x for (x, y) in boxes))
