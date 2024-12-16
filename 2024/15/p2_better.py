@@ -5,6 +5,7 @@ import re
 from collections import deque
 from collections import defaultdict
 from functools import cache
+import time 
 
 f = open(sys.argv[1], "r")
 
@@ -93,8 +94,27 @@ def trypush(box, dir, doit):
         boxes.add(nl)
     return res
     
+def printgrid():
+    print("\x1b[H")
+    for y in range(my):
+        x = 0
+        while x < mx * 2 + 1:
+            if (x, y) in walls:
+                print("#", end="")
+            elif (x, y) in boxes:
+                print("[]", end="")
+                x += 1
+            elif (x, y) == robot:
+                print("@", end="")
+            else:
+                print(" ", end="")
+            x += 1
+        print()
 
+print("\x1b[2J")
+print("\x1b[?25l")
 for move in moves.strip():
+    printgrid()
     if move == "\n": 
         continue
     dir = move_dirs[move]
@@ -112,4 +132,6 @@ for move in moves.strip():
         trypush(b, dir, True)
     robot = new
 
+printgrid()
+print("\x1b[?25h")
 print(sum(y * 100 + x for (x, y) in boxes))
