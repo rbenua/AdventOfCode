@@ -53,4 +53,15 @@ f.readline()
 patterns = f.read().strip().split("\n")
 
 p = re.compile(f"^({'|'.join(towels)})*$")
-print(sum(1 for line in patterns if p.match(line)))
+
+@cache
+def parse(line: str):
+    if len(line) == 0:
+        return 1
+    total = 0
+    for t in towels:
+        if line.startswith(t):
+            total += parse(line[len(t):])
+    return total
+
+print(sum(parse(line) for line in patterns))
