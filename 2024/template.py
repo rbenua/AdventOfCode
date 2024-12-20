@@ -48,5 +48,5 @@ def cnbrs(c):
 def clamp(p, mx, my):
     return (min(mx - 1, max(p[0], 0)), min(my - 1, max(p[1], 0)))
 
-def check_range(p, mx, my):
+def bounds_check(p, mx, my):
     return p[0] >= 0 and p[0] < mx and p[1] >= 0 and p[1] < my
