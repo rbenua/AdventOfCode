@@ -104,5 +104,6 @@ for code in codes:
     last_seq = arrow_sequence(True, code, 26)
     print(f"{code}: {last_seq}")
     total += last_seq * int(code[:-1])
+print(arrow_sequence.cache_info())
 
 print(total)

@@ -84,16 +84,15 @@ def arrow_sequence(keypad, sequence, depth):
     else:
         pad = arrow
     if depth == 0:
-        return len(sequence)
+        return sequence
     pos = pad["A"]
-    res = 0
+    res = ""
     for c in sequence:
         if c == " ":
             continue
         dest = pad[c]
-        res += min(arrow_sequence(False, p, depth - 1) for p in push_seqs(pad, pos, dest))
+        res += min((arrow_sequence(False, p, depth - 1) for p in push_seqs(pad, pos, dest)), key=len)
         pos = dest
-    #print(f"{sequence} -> {res}")
     return res
 
 total = 0
@@ -103,6 +102,7 @@ for code in codes:
         continue
     last_seq = arrow_sequence(True, code, 3)
     print(f"{code}: {last_seq}")
-    total += last_seq * int(code[:-1])
+    total += len(last_seq) * int(code[:-1])
 
+print(arrow_sequence.cache_info())
 print(total)
