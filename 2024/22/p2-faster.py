@@ -58,6 +58,7 @@ def step(seed):
     return seed
 
 sequences = []
+to_search = set()
 for seed in f.readlines():
     if seed.strip() == "":
         continue
@@ -76,8 +77,9 @@ for seed in f.readlines():
         key = tuple(deltas[i:i+4])
         if key not in results:
             results[key] = values[i+3]
+            to_search.add(key)
     sequences.append((values, deltas, results))
-    #print(f"{orig}: {seed}")
+    print(f"{seed}: {len(results)}")
 
 def search(list, pattern):
     for i in range(len(list) - len(pattern)):
@@ -92,4 +94,5 @@ def price(sequence, pattern):
 def pat_value(pattern):
     return sum(price(seq, pattern) for seq in sequences)
 
-print(max(pat_value((d1 - d0, d2 - d1, d3 - d2, d4 - d3)) for d0 in range(10) for d1 in range(10) for d2 in range(10) for d3 in range(10) for d4 in range(10)))
+print(len(to_search))
+print(max(pat_value(p) for p in to_search))
