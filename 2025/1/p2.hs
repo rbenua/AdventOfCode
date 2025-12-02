@@ -4,7 +4,7 @@ import Data.List
 main = do
     args <- getArgs
     contents <- readFile (head args) 
-    let (result, _) = foldl turn (0, 50) $ lines contents
+    let (result, _) = foldl' turn (0, 50) $ lines contents
     print result
 
 turn (count, curr) cmd =
