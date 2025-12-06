@@ -2,7 +2,6 @@
 import System.IO
 import Data.List
 import System.Environment (getArgs)
-import Data.Char (digitToInt)
 import qualified Data.Map as Map
 import Control.Monad.State
 import Data.Array
