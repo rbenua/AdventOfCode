@@ -35,7 +35,9 @@ addEdge g (_, a, b) =
     let as = fromMaybe (Set.singleton a) $ Map.lookup a g
         bs = fromMaybe (Set.singleton b) $ Map.lookup b g
         u = Set.union as bs
-    in foldr (\k g' -> Map.insert k u g') g u
+    in  if Set.member a bs
+        then g
+        else foldr (\k g' -> Map.insert k u g') g u
 
 part2 :: Graph -> [(t, Point, Point)] -> Int -> Integer
 part2 g [] goal = -1
